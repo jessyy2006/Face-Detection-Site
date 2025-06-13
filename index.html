@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<!-- make a site SIMPLE like hello world in js that will get the video stream, display the stream in a video tag element, (then start reading the example) and put a square around the face and track it. no need to code in typescript.  no need for server just html page local site.  -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facial Detection</title>
+    
+    <!--  Material Design CSS  -->
+    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+
+    <!--  Material Design JS  -->
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+</head>
+<body>
+    <h1>Facial Detection Demo</h1>
+    <p>Detects ONE face from your webcam. When ready click "enable webcam" below and accept access to the webcam.</p>
+    <div id="liveView" class="videoView">
+        <button id="webcamButton" class="mdc-button mdc-button--raised">
+        <span class="mdc-button__ripple"></span>
+        <span class="mdc-button__label">ENABLE WEBCAM</span>
+        </button>
+        <video id="webcam" autoplay playsinline></video>
+    </div>
+</body>
+</html>
