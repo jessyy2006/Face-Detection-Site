@@ -34,7 +34,11 @@ let enableWebcamButton; // type: HTMLButtonElement
 
 // debugging: is the button registering a click:
 enableWebcamButton = document.getElementById("webcamButton");
-enableWebcamButton.addEventListener("click", console.log("hello"));
+enableWebcamButton.addEventListener("click"), debug;
+
+function debug () {
+  console.log("hello")
+}
 
 // hello 
 // Check if webcam access is supported.
