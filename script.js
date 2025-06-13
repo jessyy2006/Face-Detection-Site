@@ -36,7 +36,7 @@ let enableWebcamButton; // type: HTMLButtonElement
 enableWebcamButton = document.getElementById("webcamButton");
 enableWebcamButton.addEventListener("click", console.log("hello"));
 
-
+// hello 
 // Check if webcam access is supported.
 const hasGetUserMedia = () => !!navigator.mediaDevices?.getUserMedia;
 
