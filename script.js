@@ -53,8 +53,8 @@ async function enableCam(event) {
     return;
   }
 
-  // Hide the button.
-  enableWebcamButton.classList.add("remove");
+  // Remove the button.
+  enableWebcamButton.remove(); 
 
   // getUsermedia parameters
   const constraints = {
@@ -76,6 +76,7 @@ async function enableCam(event) {
   // Recursive function to continuously track face
 let lastVideoTime = -1; // WHY -1? **
 async function predictWebcam() {
+  let startTimeMs = performance.now();
   // Detect faces using detectForVideo
   if (video.currentTime !== lastVideoTime) {
     lastVideoTime = video.currentTime;
