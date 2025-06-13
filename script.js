@@ -2,9 +2,7 @@ import {
     FaceDetector,
     FilesetResolver, 
   } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
-  
-  const demosSection = document.getElementById("demos");
-  
+    
   let faceDetector; // type: FaceDetector
   let runningMode = "VIDEO";
   
@@ -20,7 +18,6 @@ import {
       },
       runningMode: runningMode
     });
-    demosSection.classList.remove("invisible");
   };
   initializefaceDetector();
 
@@ -33,7 +30,7 @@ let enableWebcamButton; // type: HTMLButtonElement
 
 // debugging: is the button registering a click:
 enableWebcamButton = document.getElementById("webcamButton");
-enableWebcamButton.addEventListener("click"), debug;
+enableWebcamButton.addEventListener("click", debug);
 
 function debug () {
   console.log("hello")
