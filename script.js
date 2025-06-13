@@ -32,11 +32,17 @@ let video = document.getElementById("webcam");
 const liveView = document.getElementById("liveView");
 let enableWebcamButton; // type: HTMLButtonElement
 
+// debugging: is the button registering a click:
+enableWebcamButton = document.getElementById("webcamButton");
+enableWebcamButton.addEventListener("click", console.log("hello"));
+
+
 // Check if webcam access is supported.
 const hasGetUserMedia = () => !!navigator.mediaDevices?.getUserMedia;
 
+
 // Keep a reference of all the child elements we create
-// so we can remove them easilly on each render.
+// so we can remove them easily on each render.
 var children = [];
 
 // If webcam supported, add event listener to button for when user
