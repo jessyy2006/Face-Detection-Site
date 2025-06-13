@@ -2,7 +2,8 @@ import {
     FaceDetector,
     FilesetResolver, 
   } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
-    
+  
+
   let faceDetector; // type: FaceDetector
   let runningMode = "VIDEO";
   
@@ -28,15 +29,6 @@ let video = document.getElementById("webcam");
 const liveView = document.getElementById("liveView");
 let enableWebcamButton; // type: HTMLButtonElement
 
-// debugging: is the button registering a click:
-enableWebcamButton = document.getElementById("webcamButton");
-enableWebcamButton.addEventListener("click", debug);
-
-function debug () {
-  console.log("hello")
-}
-
-// hello 
 // Check if webcam access is supported.
 const hasGetUserMedia = () => !!navigator.mediaDevices?.getUserMedia;
 
@@ -62,7 +54,7 @@ async function enableCam(event) {
   }
 
   // Hide the button.
-  enableWebcamButton.classList.add("removed");
+  enableWebcamButton.classList.add("remove");
 
   // getUsermedia parameters
   const constraints = {
