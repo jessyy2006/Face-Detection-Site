@@ -98,7 +98,6 @@ async function predictWebcam() {
 
 // VISUALIZES DETECTIONS
 function displayVideoDetections(detections) { // detections is an array of Detection[]
-  console.log(detection.boundingBox); 
 
   // Remove any highlighting from previous frame (constantly updating each frame).
   for (let child of children) {
@@ -108,15 +107,13 @@ function displayVideoDetections(detections) { // detections is an array of Detec
 
   // Iterate through predictions and draw them to the live view
   for (let detection of detections) {
+    console.log(detection.boundingBox); 
     const p = document.createElement("p");
     p.innerText =
       "Confidence: " +
       Math.round(parseFloat(detection.categories[0].score) * 100) +
       "% .";
 
-
-      const x = video.offsetWidth - detection.boundingBox.x;
-      const y = detection.boundingBox.y;
     p.style =
       "left: " +
       (video.offsetWidth -
