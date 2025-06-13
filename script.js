@@ -98,77 +98,85 @@ async function predictWebcam() {
 
 // VISUALIZES DETECTIONS
 function displayVideoDetections(detections) { // detections is an array of Detection[]
-
   // Remove any highlighting from previous frame (constantly updating each frame).
+  // This prevents duplicate elements from accumulating across frames.
   for (let child of children) {
     liveView.removeChild(child);
   }
-  children.splice(0);
+  children.splice(0); // Clear the children array for new detections
 
   // Iterate through predictions and draw them to the live view
   for (let detection of detections) {
-     // Normalize coordinates
-     const box = {
-      x: detection.boundingBox.originX * video.offsetWidth,
-      y: detection.boundingBox.originY * video.offsetHeight,
-      width: detection.boundingBox.width * video.offsetWidth,
-      height: detection.boundingBox.height * video.offsetHeight
-    };
+    // First we need to normalize the bounding box coordinates
+    // MediaPipe typically returns coordinates normalized to [0,1] range
+    // We need to convert these to pixel coordinates relative to the video element
     
+    // Calculate pixel coordinates from normalized values
+    const normalizedToPixels = (normalizedValue, dimension) => normalizedValue * dimension;
+    
+    // Convert all bounding box coordinates from normalized to pixel values
+    const box = {
+      x: normalizedToPixels(detection.boundingBox.originX, video.offsetWidth),
+      y: normalizedToPixels(detection.boundingBox.originY, video.offsetHeight),
+      width: normalizedToPixels(detection.boundingBox.width, video.offsetWidth),
+      height: normalizedToPixels(detection.boundingBox.height, video.offsetHeight)
+    };
+
+    // Create confidence percentage text element
     const p = document.createElement("p");
     p.innerText =
       "Confidence: " +
       Math.round(parseFloat(detection.categories[0].score) * 100) +
       "% .";
 
-    // p.style =
-    //   "left: " +
-    //   (video.offsetWidth -
-    //     detection.boundingBox.width -
-    //     detection.boundingBox.originX) +
-    //   "px;" +
-    //   "top: " +
-    //   (detection.boundingBox.originY - 30) +
-    //   "px; " +
-    //   "width: " +
-    //   (detection.boundingBox.width - 10) +
-    //   "px;";
-
-    p.style = "left: " + (video.offsetWidth - box.width - box.x) + "px; " +
-          "top: " + (box.y - 30) + "px; " +
-          "width: " + (box.width - 10) + "px;";
-
-    const highlighter = document.createElement("div");
-    highlighter.setAttribute("class", "highlighter");
-    highlighter.style =
+    // Position the text element relative to the detected face
+    // Note: We subtract from video.offsetWidth to handle mirroring if needed
+    p.style =
       "left: " +
-      (video.offsetWidth -
-        detection.boundingBox.width -
-        detection.boundingBox.originX) +
+      (video.offsetWidth - box.width - box.x) +
       "px;" +
       "top: " +
-      detection.boundingBox.originY +
-      "px;" +
+      (box.y - 30) + // Offset text slightly above the bounding box
+      "px; " +
       "width: " +
-      (detection.boundingBox.width - 10) +
-      "px;" +
-      "height: " +
-      detection.boundingBox.height +
+      (box.width - 10) + // Slightly narrower than the actual face width
       "px;";
 
+    // Create highlighting div for the detected face
+    const highlighter = document.createElement("div");
+    highlighter.setAttribute("class", "highlighter"); // Apply CSS styling
+    highlighter.style =
+      "left: " +
+      (video.offsetWidth - box.width - box.x) +
+      "px;" +
+      "top: " +
+      box.y +
+      "px;" +
+      "width: " +
+      (box.width - 10) +
+      "px;" +
+      "height: " +
+      box.height +
+      "px;";
+
+    // Add elements to the live view container
     liveView.appendChild(highlighter);
     liveView.appendChild(p);
 
     // Store drawn objects in memory so they are queued to delete at next call
     children.push(highlighter);
     children.push(p);
+    
+    // Draw facial landmarks (keypoints) if they exist
     for (let keypoint of detection.keypoints) {
-      const keypointEl = document.createElement("spam");
+      const keypointEl = document.createElement("span"); // Fixed typo from "spam" to "span"
       keypointEl.className = "key-point";
-      keypointEl.style.top = `${keypoint.y * video.offsetHeight - 3}px`;
-      keypointEl.style.left = `${
-        video.offsetWidth - keypoint.x * video.offsetWidth - 3
-      }px`;
+      
+      // Convert normalized keypoint coordinates to pixel positions
+      // The -3 adjustment centers the point marker (assuming 6px diameter)
+      keypointEl.style.top = (keypoint.y * video.offsetHeight - 3) + "px";
+      keypointEl.style.left = (video.offsetWidth - keypoint.x * video.offsetWidth - 3) + "px";
+      
       liveView.appendChild(keypointEl);
       children.push(keypointEl);
     }
