@@ -107,25 +107,36 @@ function displayVideoDetections(detections) { // detections is an array of Detec
 
   // Iterate through predictions and draw them to the live view
   for (let detection of detections) {
-    console.log(detection.boundingBox); 
+     // Normalize coordinates
+     const box = {
+      x: detection.boundingBox.originX * video.offsetWidth,
+      y: detection.boundingBox.originY * video.offsetHeight,
+      width: detection.boundingBox.width * video.offsetWidth,
+      height: detection.boundingBox.height * video.offsetHeight
+    };
+    
     const p = document.createElement("p");
     p.innerText =
       "Confidence: " +
       Math.round(parseFloat(detection.categories[0].score) * 100) +
       "% .";
 
-    p.style =
-      "left: " +
-      (video.offsetWidth -
-        detection.boundingBox.width -
-        detection.boundingBox.originX) +
-      "px;" +
-      "top: " +
-      (detection.boundingBox.originY - 30) +
-      "px; " +
-      "width: " +
-      (detection.boundingBox.width - 10) +
-      "px;";
+    // p.style =
+    //   "left: " +
+    //   (video.offsetWidth -
+    //     detection.boundingBox.width -
+    //     detection.boundingBox.originX) +
+    //   "px;" +
+    //   "top: " +
+    //   (detection.boundingBox.originY - 30) +
+    //   "px; " +
+    //   "width: " +
+    //   (detection.boundingBox.width - 10) +
+    //   "px;";
+
+    p.style = "left: " + (video.offsetWidth - box.width - box.x) + "px; " +
+          "top: " + (box.y - 30) + "px; " +
+          "width: " + (box.width - 10) + "px;";
 
     const highlighter = document.createElement("div");
     highlighter.setAttribute("class", "highlighter");
