@@ -27,7 +27,11 @@ initializefaceDetector(); // returns promises
 // CONTINUOUS FACE DETECTION
 /*************************************************/
 let videoFull = document.getElementById("webcamFull"); // html element, empty frame for video
+let videoMask = document.getElementById("webcamMask"); // empty frame for masked video png
+
+// video
 const liveFullView = document.getElementById("liveFullView");
+const liveMaskView = document.getElementById("liveMaskView"); // div holding the video screen and face detection graphics.
 let enableWebcamButton; // type: HTMLButtonElement
 
 // Check if webcam access is supported.
@@ -70,7 +74,10 @@ async function enableCam(event) {
       // .then(func ()): waits for the Promise by getUserMedia to finish. Once it’s ready, .then() runs the function you write below w the parameter as the thing getUserMedia returns/the thing you're waiting for (ex. When the webcam is ready, run this function and give it the video stream)
 
       videoFull.srcObject = stream; // link stream to video html element, which until now was just empty frame
+      videoMask.srcObject = stream;
+
       videoFull.addEventListener("loadeddata", predictWebcam); // When the video finishes loading and is ready to play, run the predictWebcam function.
+      videoMask.addEventListener("loadeddata", predictWebcam);
     })
     .catch((err) => {
       console.error(err);
