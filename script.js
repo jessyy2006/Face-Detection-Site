@@ -121,6 +121,9 @@ function displayVideoDetections(detections) {
       Math.round(parseFloat(detection.categories[0].score) * 100) +
       "%"; // gets score as float, turns into percent, rounds to whole number
 
+    // video.offsetWidth = pixel width of the video element
+    // detection.boundingBox.width = width of box
+    // detection.boundingBox.originX = start of the horizontal placement of box (upper left corner)
     p.style = // style position of the percent
       "left: " +
       (video.offsetWidth -
@@ -162,14 +165,14 @@ function displayVideoDetections(detections) {
     children.push(p);
 
     for (let keypoint of detection.keypoints) {
-      const keypointEl = document.createElement("span");
-      keypointEl.className = "key-point";
-      keypointEl.style.top = `${keypoint.y * video.offsetHeight - 3}px`;
+      const keypointEl = document.createElement("span"); // make an element to represent the keypoint
+      keypointEl.className = "key-point"; // assign it a styling class in css
+      keypointEl.style.top = `${keypoint.y * video.offsetHeight - 3}px`; // adjust its location to fit the video
       keypointEl.style.left = `${
         video.offsetWidth - keypoint.x * video.offsetWidth - 3
       }px`;
-      liveView.appendChild(keypointEl);
-      children.push(keypointEl);
+      liveView.appendChild(keypointEl); // add to liveview
+      children.push(keypointEl); // add to children so that it can be deleted on the next frame
     }
   }
 }
