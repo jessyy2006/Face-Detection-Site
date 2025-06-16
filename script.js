@@ -83,7 +83,7 @@ async function predictWebcam() {
   let startTimeMs = performance.now();
   // Detect faces using detectForVideo
   if (videoFull.currentTime !== lastVideoTime) {
-    lastVideoTime = video.currentTime;
+    lastVideoTime = videoFull.currentTime;
     const detections = faceDetector.detectForVideo(
       videoFull,
       startTimeMs
