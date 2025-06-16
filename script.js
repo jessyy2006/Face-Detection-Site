@@ -1,26 +1,26 @@
 import {
-    FaceDetector,
-    FilesetResolver, 
-  } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
-  
+  FaceDetector,
+  FilesetResolver,
+} from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
 
-  let faceDetector; // type: FaceDetector
-  let runningMode = "VIDEO";
-  
-  // Initialize the object detector
-  const initializefaceDetector = async () => {
-    const vision = await FilesetResolver.forVisionTasks(
-      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
-    );
-    faceDetector = await FaceDetector.createFromOptions(vision, {
-      baseOptions: {
-        modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite`, // ML model that detects faces at close range
-        delegate: "GPU"
-      },
-      runningMode: runningMode
-    });
-  };
-  initializefaceDetector();
+let faceDetector; // type: FaceDetector
+let runningMode = "VIDEO";
+3;
+// Initialize the object detector
+const initializefaceDetector = async () => {
+  const vision = await FilesetResolver.forVisionTasks(
+    // while this happens..."returns a promise so can move onto next step"
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+  );
+  faceDetector = await FaceDetector.createFromOptions(vision, {
+    baseOptions: {
+      modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite`, // ML model that detects faces at close range
+      delegate: "GPU",
+    },
+    runningMode: runningMode,
+  });
+};
+initializefaceDetector();
 
 /*************************************************/
 // CONTINUOUS FACE DETECTION
@@ -31,7 +31,6 @@ let enableWebcamButton; // type: HTMLButtonElement
 
 // Check if webcam access is supported.
 const hasGetUserMedia = () => !!navigator.mediaDevices?.getUserMedia;
-
 
 // Keep a reference of all the child elements we create
 // so we can remove them easily on each render.
@@ -54,11 +53,11 @@ async function enableCam(event) {
   }
 
   // Remove the button.
-  enableWebcamButton.remove(); 
+  enableWebcamButton.remove();
 
   // getUsermedia parameters
   const constraints = {
-    video: true
+    video: true,
   };
 
   // Activate the webcam stream.
@@ -73,22 +72,25 @@ async function enableCam(event) {
     });
 }
 
-  // Recursive function to continuously track face
+// Recursive function to continuously track face
 let lastVideoTime = -1; // WHY -1? **
 async function predictWebcam() {
   let startTimeMs = performance.now();
   // Detect faces using detectForVideo
   if (video.currentTime !== lastVideoTime) {
     lastVideoTime = video.currentTime;
-    const detections = faceDetector.detectForVideo(video, startTimeMs).detections;
+    const detections = faceDetector.detectForVideo(
+      video,
+      startTimeMs
+    ).detections;
     // above line returns an object w params: {
     //   detections: [/* array of detected faces */],
     //   timestampMs: 123456789 // processing timestamp
     // } and extracts JUST THE DETECTIONS (1st param), which are objects that contain: {
-  //   boundingBox: { /* x,y,width,height */ },
-  //   keypoints: [ /* facial landmarks */ ],
-  //   confidence: 0.98 // detection certainty
-  // }
+    //   boundingBox: { /* x,y,width,height */ },
+    //   keypoints: [ /* facial landmarks */ ],
+    //   confidence: 0.98 // detection certainty
+    // }
     displayVideoDetections(detections); // calling func below using the face positions/landmarks in pixel coordinates stored in "detections" => VISUALIZES DETECTIONS
   }
 
@@ -97,7 +99,8 @@ async function predictWebcam() {
 }
 
 // VISUALIZES DETECTIONS
-function displayVideoDetections(detections) { // detections is an array of Detection[]
+function displayVideoDetections(detections) {
+  // detections is an array of Detection[]
 
   // Remove any highlighting from previous frame (constantly updating each frame).
   for (let child of children) {
@@ -107,7 +110,6 @@ function displayVideoDetections(detections) { // detections is an array of Detec
 
   // Iterate through predictions and draw them to the live view
   for (let detection of detections) {
-    
     const p = document.createElement("p");
     p.innerText =
       "Confidence: " +
@@ -163,5 +165,3 @@ function displayVideoDetections(detections) { // detections is an array of Detec
     }
   }
 }
-
-  
