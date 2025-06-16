@@ -18,10 +18,10 @@ const initializefaceDetector = async () => {
       delegate: "GPU",
     },
     runningMode: runningMode,
-    minDetectionConfidence: 0.7,
+    minDetectionConfidence: 0.65,
   });
 };
-initializefaceDetector();
+initializefaceDetector(); // returns promises
 
 /*************************************************/
 // CONTINUOUS FACE DETECTION
@@ -31,7 +31,7 @@ const liveView = document.getElementById("liveView");
 let enableWebcamButton; // type: HTMLButtonElement
 
 // Check if webcam access is supported.
-const hasGetUserMedia = () => !!navigator.mediaDevices?.getUserMedia;
+const hasGetUserMedia = () => !!navigator.mediaDevices?.getUserMedia; // !! converts the result to true or false
 
 // Keep a reference of all the child elements we create
 // so we can remove them easily on each render.
@@ -41,7 +41,7 @@ var children = [];
 // wants to activate it.
 if (hasGetUserMedia()) {
   enableWebcamButton = document.getElementById("webcamButton");
-  enableWebcamButton.addEventListener("click", enableCam);
+  enableWebcamButton.addEventListener("click", enableCam); // When someone clicks this button, run the enableCam function
 } else {
   console.warn("getUserMedia() is not supported by your browser");
 }
@@ -63,10 +63,13 @@ async function enableCam(event) {
 
   // Activate the webcam stream.
   navigator.mediaDevices
-    .getUserMedia(constraints)
+    .getUserMedia(constraints) // returns a Promise — meaning it's asynchronous
     .then(function (stream) {
+      // runs when the user accepts cam permissions and the webcam stream is ready. stream object contains the live webcam video.
+      // .then(func ()): waits for the Promise by getUserMedia to finish. Once it’s ready, .then() runs the function you write below w the parameter as the thing getUserMedia returns/the thing you're waiting for (ex. When the webcam is ready, run this function and give it the video stream)
+
       video.srcObject = stream;
-      video.addEventListener("loadeddata", predictWebcam);
+      video.addEventListener("loadeddata", predictWebcam); // When the video finishes loading and is ready to play, run the predictWebcam function.
     })
     .catch((err) => {
       console.error(err);
@@ -74,7 +77,7 @@ async function enableCam(event) {
 }
 
 // Recursive function to continuously track face
-let lastVideoTime = -1; // WHY -1? **
+let lastVideoTime = -1; // to make sure the func can start (-1 will never be equal to the video time)
 async function predictWebcam() {
   let startTimeMs = performance.now();
   // Detect faces using detectForVideo
@@ -99,7 +102,7 @@ async function predictWebcam() {
   window.requestAnimationFrame(predictWebcam);
 }
 
-// VISUALIZES DETECTIONS
+// VISUALIZES DETECTIONS for each frame
 function displayVideoDetections(detections) {
   // detections is an array of Detection[]
 
@@ -111,13 +114,14 @@ function displayVideoDetections(detections) {
 
   // Iterate through predictions and draw them to the live view
   for (let detection of detections) {
+    // create % sign
     const p = document.createElement("p");
     p.innerText =
       "Confidence: " +
       Math.round(parseFloat(detection.categories[0].score) * 100) +
-      "% .";
+      "%"; // gets score as float, turns into percent, rounds to whole number
 
-    p.style =
+    p.style = // style position of the percent
       "left: " +
       (video.offsetWidth -
         detection.boundingBox.width -
@@ -130,8 +134,9 @@ function displayVideoDetections(detections) {
       (detection.boundingBox.width - 10) +
       "px;";
 
+    // create box
     const highlighter = document.createElement("div");
-    highlighter.setAttribute("class", "highlighter");
+    highlighter.setAttribute("class", "highlighter"); // assign css class styling "highlighter"
     highlighter.style =
       "left: " +
       (video.offsetWidth -
@@ -148,14 +153,16 @@ function displayVideoDetections(detections) {
       detection.boundingBox.height +
       "px;";
 
+    // add both objects to livestream
     liveView.appendChild(highlighter);
     liveView.appendChild(p);
 
     // Store drawn objects in memory so they are queued to delete at next call
     children.push(highlighter);
     children.push(p);
+
     for (let keypoint of detection.keypoints) {
-      const keypointEl = document.createElement("spam");
+      const keypointEl = document.createElement("span");
       keypointEl.className = "key-point";
       keypointEl.style.top = `${keypoint.y * video.offsetHeight - 3}px`;
       keypointEl.style.left = `${
@@ -166,3 +173,10 @@ function displayVideoDetections(detections) {
     }
   }
 }
+
+// 1. make new vid element
+// 2. put webcam stream into that as well w/ visualizations (will have to change later but POC)
+// Once that works:
+// 1. find out how to mask the face
+// 2. find out how to extract that mask ONLY as a PNG
+// project that mask onto the next video stream.
