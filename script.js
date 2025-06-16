@@ -26,8 +26,8 @@ initializefaceDetector(); // returns promises
 /*************************************************/
 // CONTINUOUS FACE DETECTION
 /*************************************************/
-let video = document.getElementById("webcam");
-const liveView = document.getElementById("liveView");
+let videoFull = document.getElementById("webcamFull"); // html element, empty frame for video
+const liveFullView = document.getElementById("liveFullView");
 let enableWebcamButton; // type: HTMLButtonElement
 
 // Check if webcam access is supported.
@@ -65,11 +65,12 @@ async function enableCam(event) {
   navigator.mediaDevices
     .getUserMedia(constraints) // returns a Promise — meaning it's asynchronous
     .then(function (stream) {
-      // runs when the user accepts cam permissions and the webcam stream is ready. stream object contains the live webcam video.
+      // stream = a MediaStream object created by getUserMedia()= the actual webcam feed
+      // runs when the user accepts cam permissions and the webcam stream is ready.
       // .then(func ()): waits for the Promise by getUserMedia to finish. Once it’s ready, .then() runs the function you write below w the parameter as the thing getUserMedia returns/the thing you're waiting for (ex. When the webcam is ready, run this function and give it the video stream)
 
-      video.srcObject = stream;
-      video.addEventListener("loadeddata", predictWebcam); // When the video finishes loading and is ready to play, run the predictWebcam function.
+      videoFull.srcObject = stream; // link stream to video html element, which until now was just empty frame
+      videoFull.addEventListener("loadeddata", predictWebcam); // When the video finishes loading and is ready to play, run the predictWebcam function.
     })
     .catch((err) => {
       console.error(err);
@@ -81,10 +82,10 @@ let lastVideoTime = -1; // to make sure the func can start (-1 will never be equ
 async function predictWebcam() {
   let startTimeMs = performance.now();
   // Detect faces using detectForVideo
-  if (video.currentTime !== lastVideoTime) {
+  if (videoFull.currentTime !== lastVideoTime) {
     lastVideoTime = video.currentTime;
     const detections = faceDetector.detectForVideo(
-      video,
+      videoFull,
       startTimeMs
     ).detections;
     // above line returns an object w params: {
@@ -108,7 +109,7 @@ function displayVideoDetections(detections) {
 
   // Remove any highlighting from previous frame (constantly updating each frame).
   for (let child of children) {
-    liveView.removeChild(child);
+    liveFullView.removeChild(child);
   }
   children.splice(0);
 
@@ -126,7 +127,7 @@ function displayVideoDetections(detections) {
     // detection.boundingBox.originX = start of the horizontal placement of box (upper left corner)
     p.style = // style position of the percent
       "left: " +
-      (video.offsetWidth -
+      (videoFull.offsetWidth -
         detection.boundingBox.width -
         detection.boundingBox.originX) +
       "px;" +
@@ -142,7 +143,7 @@ function displayVideoDetections(detections) {
     highlighter.setAttribute("class", "highlighter"); // assign css class styling "highlighter"
     highlighter.style =
       "left: " +
-      (video.offsetWidth -
+      (videoFull.offsetWidth -
         detection.boundingBox.width -
         detection.boundingBox.originX) +
       "px;" +
@@ -157,8 +158,8 @@ function displayVideoDetections(detections) {
       "px;";
 
     // add both objects to livestream
-    liveView.appendChild(highlighter);
-    liveView.appendChild(p);
+    liveFullView.appendChild(highlighter);
+    liveFullView.appendChild(p);
 
     // Store drawn objects in memory so they are queued to delete at next call
     children.push(highlighter);
@@ -167,11 +168,11 @@ function displayVideoDetections(detections) {
     for (let keypoint of detection.keypoints) {
       const keypointEl = document.createElement("span"); // make an element to represent the keypoint
       keypointEl.className = "key-point"; // assign it a styling class in css
-      keypointEl.style.top = `${keypoint.y * video.offsetHeight - 3}px`; // adjust its location to fit the video
+      keypointEl.style.top = `${keypoint.y * videoFull.offsetHeight - 3}px`; // adjust its location to fit the video
       keypointEl.style.left = `${
-        video.offsetWidth - keypoint.x * video.offsetWidth - 3
+        videoFull.offsetWidth - keypoint.x * videoFull.offsetWidth - 3
       }px`;
-      liveView.appendChild(keypointEl); // add to liveview
+      liveFullView.appendChild(keypointEl); // add to liveFullView
       children.push(keypointEl); // add to children so that it can be deleted on the next frame
     }
   }

@@ -26,13 +26,14 @@
     <p class="instructions">
       When ready click "enable webcam" below and accept access to the webcam.
     </p>
-    <div id="liveView" class="videoView">
+    <div id="liveFullView" class="videoFullView">
       <button id="webcamButton" class="mdc-button mdc-button--raised">
         <span class="mdc-button__ripple"></span>
         <span class="mdc-button__label">ENABLE WEBCAM</span>
       </button>
 
-      <video id="webcam" autoplay playsinline></video>
+      <video id="webcamFull" autoplay playsinline></video>
+      <video id="webcamMask" autoplay playsinline></video>
     </div>
   </body>
 </html>

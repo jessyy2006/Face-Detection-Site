@@ -10,7 +10,7 @@ video {
   -moz-transform: rotateY(180deg);
 }
 
-.videoView {
+.videoFullView {
   position: relative;
   float: left;
   width: 48%;
@@ -18,7 +18,7 @@ video {
   cursor: pointer;
 }
 
-.videoView p {
+.videoFullView p {
   /* styling for floating percentage paragraph */
   position: absolute;
   padding-bottom: 5px;
