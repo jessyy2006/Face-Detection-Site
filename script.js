@@ -9,15 +9,16 @@ let runningMode = "VIDEO";
 // Initialize the object detector
 const initializefaceDetector = async () => {
   const vision = await FilesetResolver.forVisionTasks(
-    // while this happens..."returns a promise so can move onto next step"
+    // use await to pause the async func and temporarily return to main thread until promise resolves: force js to finish this statement first before moving onto the second, as the second is dependent on the first. however, browser can still load animations, etc during this time
     "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
   );
   faceDetector = await FaceDetector.createFromOptions(vision, {
     baseOptions: {
-      modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite`, // ML model that detects faces at close range
+      modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite`, // ML model that detects faces at close range (path to the specific model)
       delegate: "GPU",
     },
     runningMode: runningMode,
+    minDetectionConfidence: 0.7,
   });
 };
 initializefaceDetector();
