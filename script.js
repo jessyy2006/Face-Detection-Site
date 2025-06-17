@@ -27,7 +27,7 @@ initializefaceDetector(); // returns promises
 // CONTINUOUS FACE DETECTION
 /*************************************************/
 let videoFull = document.getElementById("webcamFull"); // html element, empty frame for video
-let videoMask = document.getElementById("webcamMask"); // empty frame for masked video png
+let videoZ = document.getElementById("webcamMask"); // empty frame for masked video png
 
 // video
 const liveFullView = document.getElementById("liveFullView"); // can't change constant vars
@@ -48,13 +48,6 @@ if (hasGetUserMedia()) {
   enableWebcamButton.addEventListener("click", enableCam); // When someone clicks this button, run the enableCam function
 } else {
   console.warn("getUserMedia() is not supported by your browser");
-}
-
-// Zoom setup:
-if (hasZoom) {
-  console.log("Browser supports zoom");
-} else {
-  alert("The browser does not support zoom.");
 }
 
 // Enable the live webcam view and start detection.
@@ -81,15 +74,38 @@ async function enableCam(event) {
       // .then(func ()): waits for the Promise by getUserMedia to finish. Once it’s ready, .then() runs the function you write below w the parameter as the thing getUserMedia returns/the thing you're waiting for (ex. When the webcam is ready, run this function and give it the video stream)
 
       videoFull.srcObject = stream; // link stream to video html element, which until now was just empty frame
-      videoMask.srcObject = stream;
+      videoZoom.srcObject = stream;
 
       videoFull.addEventListener("loadeddata", predictWebcam); // When the video finishes loading and is ready to play, run the predictWebcam function.
-      videoMask.addEventListener("loadeddata", predictWebcam);
+      videoZoom.addEventListener("loadeddata", predictWebcam);
     })
     .catch((err) => {
       console.error(err);
     });
 }
+
+// Zoom setup:
+function zoomSetUp() {
+  if (hasZoom) {
+    console.log("Browser supports zoom");
+  } else {
+    alert("The browser does not support zoom.");
+  }
+
+  // check if the camera has zoom capabilities (same cam for videoZoom and videoFull so just check 1)
+  let capabilities = videoZoom.srcObject.getCapabilities();
+  console.log(capabilities);
+
+  if ("zoom" in capabilities) {
+    let min = capabilities["zoom"]["min"]; // get the min and max zoom values embedded in cam
+    let max = capabilities["zoom"]["max"];
+    console.log("min: " + min);
+    console.log("max: " + max);
+  } else {
+    alert("This camera does not support zoom");
+  }
+}
+zoomSetUp();
 
 // Recursive function to continuously track face
 let lastVideoTime = -1; // to make sure the func can start (-1 will never be equal to the video time)
