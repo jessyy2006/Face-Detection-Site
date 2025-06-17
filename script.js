@@ -100,7 +100,7 @@ zoomSetUp();
 // check if the camera has zoom capabilities (same cam for videoZoom and videoFull so just check 1)
 videoZoom.addEventListener("loadedmetadata", async () => {
   let track = videoZoom.srcObject.getVideoTracks()[0];
-  let capabilities = track.getCapabilities();
+  let capabilities = track.getSettings();
   console.log("capabilities: ", capabilities); // no zoom, but there is resizeMode: A ConstrainDOMString object
 
   // change resizeMode to scale and crop, if necessary:
