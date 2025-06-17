@@ -96,7 +96,7 @@ function zoomSetUp() {
     let capabilities = videoZoom.srcObject
       .getVideoTracks()[0]
       .getCapabilities();
-    console.log("capabilities: " + capabilities);
+    console.log("capabilities: ", capabilities);
 
     if ("zoom" in capabilities) {
       let min = capabilities["zoom"]["min"]; // get the min and max zoom values embedded in cam
