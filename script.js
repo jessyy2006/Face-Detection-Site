@@ -30,8 +30,10 @@ let videoFull = document.getElementById("webcamFull"); // html element, empty fr
 let videoZoom = document.getElementById("webcamMask"); // empty frame for masked video png
 
 // canvas setup
-const canvas = document.getElementById("zoomedOutput");
+const canvas = document.getElementById("framedOutput");
 const ctx = canvas.getContext("2d");
+canvas.width = 640;
+canvas.height = 480;
 
 // video
 const liveFullView = document.getElementById("liveFullView"); // can't change constant vars
@@ -40,7 +42,7 @@ let enableWebcamButton; // type: HTMLButtonElement
 
 // Check if webcam access is supported.
 const hasGetUserMedia = () => !!navigator.mediaDevices?.getUserMedia; // !! converts the result to true or false
-const hasZoom = () => !!navigator.mediaDevices.getSupportedConstraints().zoom; // true or false, has zoom?
+const hasZoom = () => !!navigator.mediaDevices.getSupportedConstraints().zoom; // true or false, has zoom? maybe not necessary cuz doing digital zoom
 // Keep a reference of all the child elements we create
 // so we can remove them easily on each render.
 var children = [];
@@ -80,7 +82,9 @@ async function enableCam(event) {
       videoFull.srcObject = stream; // link stream to video html element, which until now was just empty frame
       videoZoom.srcObject = stream;
 
-      videoFull.addEventListener("loadeddata", predictWebcam); // When the video finishes loading and is ready to play, run the predictWebcam function.
+      videoFull.addEventListener("loadeddata", () => {
+        predictWebcam();
+      }); // When the video finishes loading and is ready to play, run the predictWebcam function.
       videoZoom.addEventListener("loadeddata", predictWebcam);
     })
     .catch((err) => {
@@ -103,7 +107,7 @@ videoZoom.addEventListener("loadedmetadata", async () => {
   let capabilities = track.getSettings();
   console.log("capabilities: ", capabilities); // no zoom, but there is resizeMode: A ConstrainDOMString object
 
-  // change resizeMode to scale and crop, if necessary:
+  // change resizeMode to scale and crop, if necessary (add if else):
   // Try to CHANGE resizeMode (correct way)
   try {
     await track.applyConstraints({
