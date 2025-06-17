@@ -34,6 +34,8 @@ const canvas = document.getElementById("framedOutput");
 const ctx = canvas.getContext("2d");
 canvas.width = 640;
 canvas.height = 480;
+ctx.fillStyle = "green";
+ctx.fillRect(10, 10, 150, 100);
 
 // video
 const liveFullView = document.getElementById("liveFullView"); // can't change constant vars

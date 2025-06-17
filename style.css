@@ -10,6 +10,10 @@ video {
   -moz-transform: rotateY(180deg);
 }
 
+canvas {
+  outline: black;
+}
+
 .videoFullView {
   position: relative;
   float: left;
