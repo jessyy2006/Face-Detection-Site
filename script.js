@@ -83,26 +83,12 @@ async function enableCam(event) {
       console.error(err);
     });
 }
-
 // Zoom setup:
 function zoomSetUp() {
   if (hasZoom) {
     console.log("Browser supports zoom");
   } else {
     alert("The browser does not support zoom.");
-  }
-
-  // check if the camera has zoom capabilities (same cam for videoZoom and videoFull so just check 1)
-  let capabilities = videoZoom.srcObject.getCapabilities();
-  console.log(capabilities);
-
-  if ("zoom" in capabilities) {
-    let min = capabilities["zoom"]["min"]; // get the min and max zoom values embedded in cam
-    let max = capabilities["zoom"]["max"];
-    console.log("min: " + min);
-    console.log("max: " + max);
-  } else {
-    alert("This camera does not support zoom");
   }
 }
 zoomSetUp();
@@ -127,6 +113,7 @@ async function predictWebcam() {
     //   confidence: 0.98 // detection certainty
     // }
     displayVideoDetections(detections); // calling func below using the face positions/landmarks in pixel coordinates stored in "detections" => VISUALIZES DETECTIONS
+    console.log("got to detections");
   }
 
   // Call this function again to keep predicting when the browser is ready
