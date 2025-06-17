@@ -30,13 +30,13 @@ let videoFull = document.getElementById("webcamFull"); // html element, empty fr
 let videoMask = document.getElementById("webcamMask"); // empty frame for masked video png
 
 // video
-const liveFullView = document.getElementById("liveFullView");
+const liveFullView = document.getElementById("liveFullView"); // can't change constant vars
 const liveMaskView = document.getElementById("liveMaskView"); // div holding the video screen and face detection graphics.
 let enableWebcamButton; // type: HTMLButtonElement
 
 // Check if webcam access is supported.
 const hasGetUserMedia = () => !!navigator.mediaDevices?.getUserMedia; // !! converts the result to true or false
-
+const hasZoom = () => !!navigator.mediaDevices.getSupportedConstraints().zoom; // true or false, has zoom?
 // Keep a reference of all the child elements we create
 // so we can remove them easily on each render.
 var children = [];
@@ -48,6 +48,13 @@ if (hasGetUserMedia()) {
   enableWebcamButton.addEventListener("click", enableCam); // When someone clicks this button, run the enableCam function
 } else {
   console.warn("getUserMedia() is not supported by your browser");
+}
+
+// Zoom setup:
+if (hasZoom) {
+  console.log("Browser supports zoom");
+} else {
+  alert("The browser does not support zoom.");
 }
 
 // Enable the live webcam view and start detection.
