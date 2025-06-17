@@ -295,13 +295,13 @@ function processFrame(detections) {
   console.log("got to drawing canvas with face: ", face);
   ctx.drawImage(
     videoFull,
-    videoFull.offsetWidth - xCenter - canvas.width / (2 * zoomScale), // Unsmoothed X, might have to flip 180
+    canvas.offsetWidth - xCenter - canvas.width / (2 * zoomScale), // Unsmoothed X, might have to flip 180
     yCenter - canvas.height / (2 * zoomScale), // Unsmoothed Y
-    videoFull.offsetWidth - canvas.width / zoomScale,
+    canvas.width / zoomScale,
     canvas.height / zoomScale,
     0,
     0,
-    videoFull.offsetWidth - canvas.width,
+    canvas.width,
     canvas.height
   );
 }
