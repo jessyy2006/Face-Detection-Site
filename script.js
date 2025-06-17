@@ -35,7 +35,6 @@ const ctx = canvas.getContext("2d");
 canvas.width = 640;
 canvas.height = 480;
 ctx.fillStyle = "green";
-ctx.fillRect(10, 10, 150, 100);
 
 // video
 const liveFullView = document.getElementById("liveFullView"); // can't change constant vars
@@ -295,7 +294,7 @@ function processFrame(detections) {
   let zoomscale = targetFacePixels / face.width;
 
   ctx.drawImage(
-    video,
+    videoFull,
     face.xCenter - canvas.width / (2 * zoomScale), // Unsmoothed X, might have to flip 180
     face.yCenter - canvas.height / (2 * zoomScale), // Unsmoothed Y
     canvas.width / zoomScale,
