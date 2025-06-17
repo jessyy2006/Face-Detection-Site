@@ -96,7 +96,7 @@ function zoomSetUp() {
     let capabilities = videoZoom.srcObject
       .getVideoTracks()[0]
       .getCapabilities();
-    console.log("capabilities: ", capabilities[11].ideal); // no zoom, but there is resizeMode: A ConstrainDOMString object
+    console.log("capabilities: ", capabilities.resizeMode.ideal); // no zoom, but there is resizeMode: A ConstrainDOMString object
 
     if ("zoom" in capabilities) {
       let min = capabilities["zoom"]["min"]; // get the min and max zoom values embedded in cam
