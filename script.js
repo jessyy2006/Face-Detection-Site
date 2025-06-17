@@ -153,8 +153,11 @@ async function predictWebcam() {
     //   keypoints: [ /* facial landmarks */ ],
     //   confidence: 0.98 // detection certainty
     // }
-    displayVideoDetections(detections); // calling func below using the face positions/landmarks in pixel coordinates stored in "detections" => VISUALIZES DETECTIONS
+    displayVideoDetections(detections); // calling func below using the face positions/landmarks in pixel coordinates stored in "detections" => VISUALIZES DETECTIONS. since mediapipe orders the most prominently detected face first, detections[0] is the most obvious face.
     console.log("got to detections");
+
+    processFrame(detections);
+    console.log("got to processing canvas");
   }
 
   // Call this function again to keep predicting when the browser is ready
@@ -236,6 +239,9 @@ function displayVideoDetections(detections) {
   }
 }
 
+/*************************************************/
+// FACE TRACKING + ZOOM
+/*************************************************/
 // Once that works:
 // 1. set up zoom
 // 2. do some math to link that zoom to the bounding box of the face:
@@ -251,3 +257,50 @@ function displayVideoDetections(detections) {
 // Bonus 1: Add a "padding" parameter to control how much space is around the subject.
 //    d. Draw result to <canvas>.
 // 3. Repeat.
+
+// Configuration for face tracking mechanism
+const TARGET_FACE_RATIO = 0.3; // Face height = 30% of frame height
+const SMOOTHING_FACTOR = 0.2; // For exponential moving average to smooth
+
+// State
+let smoothX = 0,
+  smoothY = 0,
+  smoothWidth = 0;
+
+function processFrame(detections) {
+  if (!detections || detections.length === 0) {
+    // No face: gradually reset zoom
+    return;
+  }
+
+  // // Initialize on first detection
+  // if (smoothWidth === 0) {
+  //   smoothX = face.xCenter;
+  //   smoothY = face.yCenter;
+  //   smoothWidth = face.width;
+  // }
+
+  // without smooth for now
+  const face = detections[0].boundingBox; // most prom face -> get box.
+
+  let xCenter = face.originX + face.width / 2;
+  let yCenter = face.originY + face.height / 2;
+
+  // 1. Smooth face position (EMA)
+
+  // 2. calc zoom level
+  let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
+  let zoomscale = targetFacePixels / face.width;
+
+  ctx.drawImage(
+    video,
+    face.xCenter - canvas.width / (2 * zoomScale), // Unsmoothed X, might have to flip 180
+    face.yCenter - canvas.height / (2 * zoomScale), // Unsmoothed Y
+    canvas.width / zoomScale,
+    canvas.height / zoomScale,
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+}
