@@ -292,6 +292,7 @@ function processFrame(detections) {
   let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
   let zoomScale = targetFacePixels / face.width;
 
+  console.log("got to drawing canvas with face: ", face);
   ctx.drawImage(
     videoFull,
     face.xCenter - canvas.width / (2 * zoomScale), // Unsmoothed X, might have to flip 180
