@@ -27,7 +27,7 @@ initializefaceDetector(); // returns promises
 // CONTINUOUS FACE DETECTION
 /*************************************************/
 let videoFull = document.getElementById("webcamFull"); // html element, empty frame for video
-let videoZ = document.getElementById("webcamMask"); // empty frame for masked video png
+let videoZoom = document.getElementById("webcamMask"); // empty frame for masked video png
 
 // video
 const liveFullView = document.getElementById("liveFullView"); // can't change constant vars
