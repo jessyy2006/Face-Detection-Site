@@ -185,9 +185,18 @@ function displayVideoDetections(detections) {
   }
 }
 
-// 1. make new vid element
-// 2. put webcam stream into that as well w/ visualizations (will have to change later but POC)
 // Once that works:
-// 1. find out how to mask the face
-// 2. find out how to extract that mask ONLY as a PNG
-// project that mask onto the next video stream.
+// 1. set up zoom
+// 2. do some math to link that zoom to the bounding box of the face:
+//
+// 1. Start webcam stream.
+// 2. For each frame:
+//    a. Detect subject (face/person) → get bounding box.
+//    b. If no subject, gradually reset zoom.
+//    c. Else:
+//       i. Calculate desired zoom level (e.g., subject width = 50% of frame).
+//       ii. Smooth the subject’s position (avoid jumps).
+//       iii. Crop the frame around the subject and resize to output dimensions.
+// Bonus 1: Add a "padding" parameter to control how much space is around the subject.
+//    d. Draw result to <canvas>.
+// 3. Repeat.
