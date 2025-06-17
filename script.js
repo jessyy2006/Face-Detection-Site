@@ -90,6 +90,19 @@ function zoomSetUp() {
   } else {
     alert("The browser does not support zoom.");
   }
+
+  // check if the camera has zoom capabilities (same cam for videoZoom and videoFull so just check 1)
+  let capabilities = videoZoom.srcObject.getVideoTracks()[0].getCapabilities();
+  console.log(capabilities);
+
+  if ("zoom" in capabilities) {
+    let min = capabilities["zoom"]["min"]; // get the min and max zoom values embedded in cam
+    let max = capabilities["zoom"]["max"];
+    console.log("min: " + min);
+    console.log("max: " + max);
+  } else {
+    alert("This camera does not support zoom");
+  }
 }
 zoomSetUp();
 
