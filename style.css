@@ -12,6 +12,10 @@ video {
 
 canvas {
   outline: black;
+  display: block;
+  transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg); /* mirror camera */
+  -moz-transform: rotateY(180deg);
 }
 
 .videoFullView {
