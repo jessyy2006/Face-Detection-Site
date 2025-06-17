@@ -312,3 +312,4 @@ function processFrame(detections) {
 // 3. if start close to camera, drawImage projects a smaller - than - canvas video that only increases as i move back and fill up the frame...prob has something to do with canvas sizing / drawImage setup
 // 4. very choppy animation and very jittery, add smoothing
 // 5. if face isn't recognizable, zoom autoresets, which can be jarring. maybe a slow return to 100% canvas fill w video? this can also be changed by changing the confidence bound for face detection, but runs the risk of detecting things that aren't faces at all/poor detection
+// 6. when person leaves frame, camera freezes on wherever the face was last seen...like #5, figure out a way to smoothly transition back to just the full video stream w no zoom
