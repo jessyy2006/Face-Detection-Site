@@ -94,32 +94,41 @@ function zoomSetUp() {
   } else {
     alert("The browser does not support zoom.");
   }
-
-  // check if the camera has zoom capabilities (same cam for videoZoom and videoFull so just check 1)
-  videoZoom.addEventListener("loadedmetadata", () => {
-    let capabilities = videoZoom.srcObject.getVideoTracks()[0].getSettings();
-    console.log("capabilities: ", capabilities); // no zoom, but there is resizeMode: A ConstrainDOMString object
-
-    videoZoom.srcObject.getVideoTracks()[0].getSettings().resizeMode =
-      "crop-and-scale";
-    console.log("capabilities: ", capabilities);
-    // when I use .getSettings():
-    // - aspectRatio = 1.333(4x3)
-    // - width = 640
-    // - height = 480
-    // - resizeMode rn = none, but i wanna change to 'crop-and-scale'?
-
-    //   if ("zoom" in capabilities) {
-    //     let min = capabilities["zoom"]["min"]; // get the min and max zoom values embedded in cam
-    //     let max = capabilities["zoom"]["max"];
-    //     console.log("min: " + min);
-    //     console.log("max: " + max);
-    //   } else {
-    //     alert("This camera does not support zoom");
-    //   }
-  });
 }
 zoomSetUp();
+
+// check if the camera has zoom capabilities (same cam for videoZoom and videoFull so just check 1)
+videoZoom.addEventListener("loadedmetadata", async () => {
+  let track = videoZoom.srcObject.getVideoTracks()[0];
+  let capabilities = track.getCapabilities();
+  console.log("capabilities: ", capabilities); // no zoom, but there is resizeMode: A ConstrainDOMString object
+
+  // change resizeMode to scale and crop, if necessary:
+  // Try to CHANGE resizeMode (correct way)
+  try {
+    await track.applyConstraints({
+      advanced: [{ resizeMode: "crop-and-scale" }],
+    });
+    console.log("Successfully requested 'crop-and-scale'!");
+  } catch (err) {
+    console.error("Failed to set resizeMode:", err);
+  }
+  console.log("new capabilities: ", capabilities);
+  // when I use .getSettings():
+  // - aspectRatio = 1.333(4x3)
+  // - width = 640
+  // - height = 480
+  // - resizeMode rn = none, but i wanna change to 'crop-and-scale'?
+
+  //   if ("zoom" in capabilities) {
+  //     let min = capabilities["zoom"]["min"]; // get the min and max zoom values embedded in cam
+  //     let max = capabilities["zoom"]["max"];
+  //     console.log("min: " + min);
+  //     console.log("max: " + max);
+  //   } else {
+  //     alert("This camera does not support zoom");
+  //   }
+});
 
 // Recursive function to continuously track face
 let lastVideoTime = -1; // to make sure the func can start (-1 will never be equal to the video time)
