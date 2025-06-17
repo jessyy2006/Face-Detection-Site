@@ -34,7 +34,6 @@ const canvas = document.getElementById("framedOutput");
 const ctx = canvas.getContext("2d");
 canvas.width = 640;
 canvas.height = 480;
-ctx.fillStyle = "green";
 
 // video
 const liveFullView = document.getElementById("liveFullView"); // can't change constant vars
@@ -291,7 +290,7 @@ function processFrame(detections) {
 
   // 2. calc zoom level
   let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
-  let zoomscale = targetFacePixels / face.width;
+  let zoomScale = targetFacePixels / face.width;
 
   ctx.drawImage(
     videoFull,
