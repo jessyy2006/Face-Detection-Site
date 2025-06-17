@@ -29,6 +29,10 @@ initializefaceDetector(); // returns promises
 let videoFull = document.getElementById("webcamFull"); // html element, empty frame for video
 let videoZoom = document.getElementById("webcamMask"); // empty frame for masked video png
 
+// canvas setup
+const canvas = document.getElementById("zoomedOutput");
+const ctx = canvas.getContext("2d");
+
 // video
 const liveFullView = document.getElementById("liveFullView"); // can't change constant vars
 const liveMaskView = document.getElementById("liveMaskView"); // div holding the video screen and face detection graphics.
@@ -93,9 +97,7 @@ function zoomSetUp() {
 
   // check if the camera has zoom capabilities (same cam for videoZoom and videoFull so just check 1)
   videoZoom.addEventListener("loadedmetadata", () => {
-    let capabilities = videoZoom.srcObject
-      .getVideoTracks()[0]
-      .getCapabilities();
+    let capabilities = videoZoom.srcObject.getVideoTracks()[0].getSettings();
     console.log("capabilities: ", capabilities); // no zoom, but there is resizeMode: A ConstrainDOMString object
 
     //   if ("zoom" in capabilities) {
