@@ -100,6 +100,15 @@ function zoomSetUp() {
     let capabilities = videoZoom.srcObject.getVideoTracks()[0].getSettings();
     console.log("capabilities: ", capabilities); // no zoom, but there is resizeMode: A ConstrainDOMString object
 
+    videoZoom.srcObject.getVideoTracks()[0].getSettings().resizeMode =
+      "crop-and-scale";
+    console.log("capabilities: ", capabilities);
+    // when I use .getSettings():
+    // - aspectRatio = 1.333(4x3)
+    // - width = 640
+    // - height = 480
+    // - resizeMode rn = none, but i wanna change to 'crop-and-scale'?
+
     //   if ("zoom" in capabilities) {
     //     let min = capabilities["zoom"]["min"]; // get the min and max zoom values embedded in cam
     //     let max = capabilities["zoom"]["max"];
