@@ -305,3 +305,10 @@ function processFrame(detections) {
     canvas.height
   );
 }
+
+// issues:
+// 1. doesn't stop me from going offscreen
+// 2. duplicate pictures when come close to camera (need to add a lower bound on face framing...maybe no zoom at all once face is filling frame to a certain point, just tracking ?)
+// 3. if start close to camera, drawImage projects a smaller - than - canvas video that only increases as i move back and fill up the frame...prob has something to do with canvas sizing / drawImage setup
+// 4. very choppy animation and very jittery, add smoothing
+// 5. if face isn't recognizable, zoom autoresets, which can be jarring. maybe a slow return to 100% canvas fill w video? this can also be changed by changing the confidence bound for face detection, but runs the risk of detecting things that aren't faces at all/poor detection
