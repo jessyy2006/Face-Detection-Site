@@ -298,6 +298,7 @@ function processFrame(detections) {
 
     smoothedZoom =
       zoomScale * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
+    console.log("got to drawing canvas with face: ", face);
   } else {
     // IF NO FACE: (after this first change, it doesnt even go back to being fixed after i reveal face. because on line 279, boundingbox doesn't exist. )
     // No face: need to gradually reset zoom instead of making it abrupt
@@ -314,8 +315,6 @@ function processFrame(detections) {
     smoothedZoom = 1 * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
     console.log("detected no face, iterating now: ", face);
   }
-
-  console.log("got to drawing canvas with face: ", face);
 
   ctx.drawImage(
     // source video
