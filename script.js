@@ -137,7 +137,7 @@ videoZoom.addEventListener("loadedmetadata", async () => {
 // Recursive function to continuously track face
 let lastVideoTime = -1; // to make sure the func can start (-1 will never be equal to the video time)
 let frameCounter = 0;
-let oldFace = null;
+let refFace = null;
 let detections = null;
 async function predictWebcam() {
   let startTimeMs = performance.now();
@@ -158,16 +158,17 @@ async function predictWebcam() {
 
     const newFace = detections[0].boundingBox;
 
-    if (frameCounter % 20 === 0) {
-      if (!oldFace) {
-        // checks if it is !null = !false = true
-        oldFace = newFace;
-      }
+    // if (frameCounter % 10 === 0) {
+    //   // every 10 frames
+    //   if (!refFace) {
+    //     // checks if it is !null = !false = true
+    //     refFace = newFace;
+    //   }
 
-      // every 20 frames, including first
-      didPositionChange(newFace, oldFace); // => then run processFrame within this func
-      oldFace = newFace;
-    }
+    //   // every 20 frames, including first
+    //   didPositionChange(newFace, refFace); // => then run processFrame within this func
+    //   refFace = newFace;
+    // }
     processFrame(detections);
 
     frameCounter++;
@@ -315,26 +316,26 @@ function processFrame(detections) {
   );
 }
 
-// check if face position has changed enough to warrant tracking
-function didPositionChange(newFace, oldFace) {
-  const thresholdX = canvas.width * 0.05; // 5% of the width
-  const thresholdY = canvas.height * 0.05; // 5% of the height
+// // check if face position has changed enough to warrant tracking
+// function didPositionChange(newFace, refFace) {
+//   const thresholdX = canvas.width * 0.05; // 5% of the width
+//   const thresholdY = canvas.height * 0.05; // 5% of the height
 
-  const zoomRatio = newFace.width / oldFace.width;
-  const zoomThreshold = 0.05; // allow 5% zoom change before reacting
+//   const zoomRatio = newFace.width / refFace.width;
+//   const zoomThreshold = 0.05; // allow 5% zoom change before reacting
 
-  if (
-    Math.abs(newFace.originX - oldFace.originX) > thresholdX ||
-    Math.abs(newFace.originY - oldFace.originY) > thresholdY
-  ) {
-    // if position OR distance from cam changed a lot
-    processFrame(detections);
-  } else if (Math.abs(1 - zoomRatio) > zoomThreshold) {
-    processFrame(detections);
-  } else {
-    return; // exit
-  }
-}
+//   if (
+//     Math.abs(newFace.originX - refFace.originX) > thresholdX ||
+//     Math.abs(newFace.originY - refFace.originY) > thresholdY
+//   ) {
+//     // if position OR distance from cam changed a lot
+//     processFrame(detections);
+//   } else if (Math.abs(1 - zoomRatio) > zoomThreshold) {
+//     processFrame(detections);
+//   } else {
+//     return; // exit
+//   }
+// }
 
 // issues:
 // 1. doesn't stop me from going offscreen
