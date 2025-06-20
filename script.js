@@ -274,8 +274,8 @@ let smoothedX = 0,
 
 function processFrame(detections) {
   console.log("got to processing canvas");
+  // EMA formula: smoothedY = targetY * α + smoothedY * (1 - α)
 
-  // without smooth for now
   const face = detections[0].boundingBox; // most prom face -> get box.
 
   let xCenter = face.originX + face.width / 2;
@@ -301,25 +301,29 @@ function processFrame(detections) {
   // IF NO FACE:
   if (!detections || detections.length === 0) {
     // No face: need to gradually reset zoom instead of making it abrupt
-    // smoothedZoom -> 1
-    // smoothedX ->
-    // smoothedY ->
-    smoothedX = xCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedX;
-    smoothedY = yCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedY;
-    smoothedZoom =
-      zoomScale * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
+    // smoothedZoom -> 1 (no zoom)
+    // smoothedX -> videoFull.videoWidth / 2 (center of the video frame)
+    // smoothedY -> videoFull.videoHeight / 2
+
+    smoothedX =
+      (videoFull.videoWidth / 2) * SMOOTHING_FACTOR +
+      (1 - SMOOTHING_FACTOR) * smoothedX;
+    smoothedY =
+      (videoFull.videoHeight / 2) * SMOOTHING_FACTOR +
+      (1 - SMOOTHING_FACTOR) * smoothedY;
+    smoothedZoom = 1 * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
+
     return;
   }
+
   console.log("got to drawing canvas with face: ", face);
-  console.log(`videoFull.videoWidth = ${videoFull.videoWidth}`);
-  console.log(`canvas.width = ${canvas.width}`);
 
   ctx.drawImage(
     // source video
     videoFull,
 
     // cropped from source
-    smoothedX / (2 * smoothedZoom), // top left corner of crop in og vid
+    videoFull.videoWidth - smoothedX - canvas.width / (2 * smoothedZoom), // top left corner of crop in og vid
     smoothedY - canvas.height / (2 * smoothedZoom), // canvas.height / (2 * zoomScale) = half the height of the cropped area
     canvas.width / smoothedZoom, // how wide a piece we're cropping from original vid
     canvas.height / smoothedZoom, // how tall
