@@ -313,7 +313,7 @@ function processFrame(detections) {
       (videoFull.videoHeight / 2) * SMOOTHING_FACTOR +
       (1 - SMOOTHING_FACTOR) * smoothedY;
     smoothedZoom = 1 * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
-    console.log("detected no face, iterating now: ", face);
+    console.log("detected no face, iterating now: ");
   }
 
   ctx.drawImage(
