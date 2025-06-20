@@ -304,7 +304,7 @@ function processFrame(detections) {
     videoFull,
 
     // cropped from source
-    canvas.offsetWidth - smoothedX - canvas.width / (2 * zoomScale), // top left corner of crop in og vid
+    videoFull.videoWidth - smoothedX - canvas.width / (2 * zoomScale), // top left corner of crop in og vid
     smoothedY - canvas.height / (2 * zoomScale), // canvas.height / (2 * zoomScale) = half the height of the cropped area
     canvas.width / zoomScale, // how wide a piece we're cropping from original vid
     canvas.height / zoomScale, // how tall
