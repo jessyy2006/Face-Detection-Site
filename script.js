@@ -300,11 +300,14 @@ function processFrame(detections) {
       zoomScale * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
     console.log("got to drawing canvas with face: ", face);
   } else {
-    // IF NO FACE: (after this first change, it doesnt even go back to being fixed after i reveal face. because on line 279, boundingbox doesn't exist. )
-    // No face: need to gradually reset zoom instead of making it abrupt
+    // IF NO FACE:
     // smoothedZoom -> 1 (no zoom)
     // smoothedX -> videoFull.videoWidth / 2 (center of the video frame)
     // smoothedY -> videoFull.videoHeight / 2
+
+    // main issues:
+    // 1. if detects face again after not detecting it for a while, it's an immediate jump back.
+    // 2. works better for when i'm very zoomed in (distance = far) than when i'm zoomed out (distance close). it jumps around a lot when i'm zoomed out. this doesn't need fixing though, as I need to make sure zooming out (with the pic duplicates around me) doesn't happen period.
 
     smoothedX =
       (videoFull.videoWidth / 2) * SMOOTHING_FACTOR +
