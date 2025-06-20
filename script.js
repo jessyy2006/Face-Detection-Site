@@ -156,6 +156,11 @@ async function predictWebcam() {
     displayVideoDetections(detections); // calling func below using the face positions/landmarks in pixel coordinates stored in "detections" => VISUALIZES DETECTIONS. since mediapipe orders the most prominently detected face first, detections[0] is the most obvious face.
     console.log("got to detections");
 
+    // const facePosition = detections[0].boundingBox; // most prom face -> get box.
+
+    // if (didPositionChange(facePosition)) {
+    //   //processFrame
+    // }
     processFrame(detections);
     console.log("got to processing canvas");
   }
@@ -247,11 +252,11 @@ function displayVideoDetections(detections) {
 
 // Configuration for face tracking mechanism
 const TARGET_FACE_RATIO = 0.3; // Face height = 30% of frame height
-const SMOOTHING_FACTOR = 0.2; // For exponential moving average to smooth
+const SMOOTHING_FACTOR = 0.2; // For exponential moving average to smooth, aka how much you trust the new value
 
 // State
-let smoothX = 0,
-  smoothY = 0,
+let smoothedX = 0,
+  smoothedY = 0,
   smoothWidth = 0;
 
 function processFrame(detections) {
@@ -260,20 +265,25 @@ function processFrame(detections) {
     return;
   }
 
-  // // Initialize on first detection
-  // if (smoothWidth === 0) {
-  //   smoothX = face.xCenter;
-  //   smoothY = face.yCenter;
-  //   smoothWidth = face.width;
-  // }
-
   // without smooth for now
   const face = detections[0].boundingBox; // most prom face -> get box.
 
   let xCenter = face.originX + face.width / 2;
-  let yCenter = face.originY + face.height / 2;
+  let yCenter = face.originY + face.height / 2; // current raw value
 
   // 1. Smooth face position (EMA)
+
+  // Initialize on first detection so isn't initialized to 0
+  if (smoothWidth === 0) {
+    smoothedX = xCenter;
+    smoothedY = yCenter;
+    smoothWidth = face.width;
+  }
+
+  let smoothedX =
+    xCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedX;
+  let smoothedY =
+    yCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedY; // use old smoothed value to get new smoothed value. this gets a "ratio" where new smoothedY is made up w a little bit of the new value and most of the old
 
   // 2. calc zoom level
   let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
@@ -285,8 +295,8 @@ function processFrame(detections) {
     videoFull,
 
     // cropped from source
-    canvas.offsetWidth - xCenter - canvas.width / (2 * zoomScale), // top left corner of crop in og vid
-    canvas.offsetHeight - yCenter - canvas.height / (2 * zoomScale), // yCenter - canvas.height / (2 * zoomScale) = half the height of the cropped area
+    canvas.offsetWidth - smoothedX - canvas.width / (2 * zoomScale), // top left corner of crop in og vid
+    smoothedY - canvas.height / (2 * zoomScale), // canvas.height / (2 * zoomScale) = half the height of the cropped area
     canvas.width / zoomScale, // how wide a piece we're cropping from original vid
     canvas.height / zoomScale, // how tall
 
@@ -298,6 +308,9 @@ function processFrame(detections) {
   );
 }
 
+// check if face position has changed enough to warrant tracking
+function didPositionChange(face) {}
+
 // issues:
 // 1. doesn't stop me from going offscreen
 // 2. duplicate pictures when come close to camera (need to add a lower bound on face framing...maybe no zoom at all once face is filling frame to a certain point, just tracking ?)
@@ -305,7 +318,7 @@ function processFrame(detections) {
 // 4. very choppy animation and very jittery, add smoothing
 // 5. if face isn't recognizable, zoom autoresets, which can be jarring. maybe a slow return to 100% canvas fill w video? this can also be changed by changing the confidence bound for face detection, but runs the risk of detecting things that aren't faces at all/poor detection
 // 6. when person leaves frame, camera freezes on wherever the face was last seen...like #5, figure out a way to smoothly transition back to just the full video stream w no zoom
-// 7. when another person enters frame and both faces are equally visible (one isn't very far in back), because processFrame() only creates face based on the most "prominent face", if both are oscillating between being equally as promiminent with every small movement, the camera zoom jumps around.
+// 7. when another person enters frame and both faces are equally visible (one isn't very far in back), because processFrame() only creates face based on the most "prominent face", if both are oscillating between being equally as promiminent with every small movement, the camera zoom jumps around. Solve: could just remove all detections from detections array except for first one every time it detects face (every frame) so it literally can only adapt to the first person it sees...? not sure act.
 
 // mathieu's issues:
 // - Managing model errors (when your model is talking nonsense or when it doesn't detect anything at all): when the results returned by your model are too different from one frame to another, keep the current position of your zoom window.
