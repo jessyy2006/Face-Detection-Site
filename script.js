@@ -295,7 +295,7 @@ function processFrame(detections) {
 
   // 2. calc zoom level
   let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
-  let zoomScale = targetFacePixels / smoothed.width; // how much should our face be scaled based on its current bounding box width?
+  let zoomScale = targetFacePixels / smoothedWidth; // how much should our face be scaled based on its current bounding box width?
 
   console.log("got to drawing canvas with face: ", face);
   ctx.drawImage(
