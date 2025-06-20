@@ -242,21 +242,8 @@ function displayVideoDetections(detections) {
 /*************************************************/
 // FACE TRACKING + ZOOM
 /*************************************************/
-// Once that works:
-// 1. set up zoom
-// 2. do some math to link that zoom to the bounding box of the face:
-//
-// 1. Start webcam stream.
-// 2. For each frame:
-//    a. Detect subject (face/person) → get bounding box.
-//    b. If no subject, gradually reset zoom.
-//    c. Else:
-//       i. Calculate desired zoom level (e.g., subject width = 50% of frame).
-//       ii. Smooth the subject’s position (avoid jumps).
-//       iii. Crop the frame around the subject and resize to output dimensions.
-// Bonus 1: Add a "padding" parameter to control how much space is around the subject.
-//    d. Draw result to <canvas>.
-// 3. Repeat.
+// TO-DOs:
+// - Add a "padding" parameter to control how much space is around the subject.
 
 // Configuration for face tracking mechanism
 const TARGET_FACE_RATIO = 0.3; // Face height = 30% of frame height
@@ -269,7 +256,7 @@ let smoothX = 0,
 
 function processFrame(detections) {
   if (!detections || detections.length === 0) {
-    // No face: gradually reset zoom
+    // No face: need to gradually reset zoom instead of making it abrupt
     return;
   }
 
@@ -290,18 +277,23 @@ function processFrame(detections) {
 
   // 2. calc zoom level
   let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
-  let zoomScale = targetFacePixels / face.width;
+  let zoomScale = targetFacePixels / face.width; // how much should our face be scaled based on its current bounding box width?
 
   console.log("got to drawing canvas with face: ", face);
   ctx.drawImage(
+    // source video
     videoFull,
-    canvas.offsetWidth - xCenter - canvas.width / (2 * zoomScale), // Unsmoothed X, might have to flip 180
-    yCenter - canvas.height / (2 * zoomScale), // Unsmoothed Y
-    canvas.width / zoomScale,
-    canvas.height / zoomScale,
+
+    // cropped from source
+    canvas.offsetWidth - xCenter - canvas.width / (2 * zoomScale), // top left corner of crop in og vid
+    canvas.offsetHeight - yCenter - canvas.height / (2 * zoomScale), // yCenter - canvas.height / (2 * zoomScale) = half the height of the cropped area
+    canvas.width / zoomScale, // how wide a piece we're cropping from original vid
+    canvas.height / zoomScale, // how tall
+
+    // destination
+    0, // x coord for where on canvas to start drawing (left->right)
     0,
-    0,
-    canvas.width,
+    canvas.width, // since canvas width/height is hardcoded to my video resolution, this maintains aspect ratio. should change this to update to whatever cam resolution rainbow uses.
     canvas.height
   );
 }
@@ -313,3 +305,11 @@ function processFrame(detections) {
 // 4. very choppy animation and very jittery, add smoothing
 // 5. if face isn't recognizable, zoom autoresets, which can be jarring. maybe a slow return to 100% canvas fill w video? this can also be changed by changing the confidence bound for face detection, but runs the risk of detecting things that aren't faces at all/poor detection
 // 6. when person leaves frame, camera freezes on wherever the face was last seen...like #5, figure out a way to smoothly transition back to just the full video stream w no zoom
+// 7. when another person enters frame and both faces are equally visible (one isn't very far in back), because processFrame() only creates face based on the most "prominent face", if both are oscillating between being equally as promiminent with every small movement, the camera zoom jumps around.
+
+// mathieu's issues:
+// - Managing model errors (when your model is talking nonsense or when it doesn't detect anything at all): when the results returned by your model are too different from one frame to another, keep the current position of your zoom window.
+
+// - Don't move the zoom window with each frame; wait until there is a significant difference in position for a few frames (10/20/30 frames?) before moving it.
+
+// - Don't move your window “abruptly”; instead, try to do a kind of smooth tracking/zoom (smooth it out over several frames (the number of which is to be determined)
