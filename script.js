@@ -266,7 +266,7 @@ const SMOOTHING_FACTOR = 0.2; // For exponential moving average to smooth, aka h
 // smoothing declarations
 let smoothedX = 0,
   smoothedY = 0,
-  smoothWidth = 0;
+  smoothedWidth = 0;
 
 function processFrame(detections) {
   console.log("got to processing canvas");
@@ -283,12 +283,12 @@ function processFrame(detections) {
 
   // 1. Smooth face position (EMA)
   // Initialize on first detection so isn't initialized to 0
-  if (smoothWidth === 0) {
+  if (smoothedWidth === 0) {
     smoothedX = xCenter;
     smoothedY = yCenter;
-    smoothWidth = face.width;
+    smoothedWidth = face.width;
   }
-  smoothWidth =
+  smoothedWidth =
     face.width * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedWidth;
   smoothedX = xCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedX;
   smoothedY = yCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedY; // use old smoothed value to get new smoothed value. this gets a "ratio" where new smoothedY is made up w a little bit of the new value and most of the old
@@ -305,7 +305,7 @@ function processFrame(detections) {
     // cropped from source
     canvas.offsetWidth - smoothedX - canvas.width / (2 * zoomScale), // top left corner of crop in og vid
     smoothedY - canvas.height / (2 * zoomScale), // canvas.height / (2 * zoomScale) = half the height of the cropped area
-    smoothWidth / zoomScale, // how wide a piece we're cropping from original vid
+    smoothedWidth / zoomScale, // how wide a piece we're cropping from original vid
     canvas.height / zoomScale, // how tall
 
     // destination
