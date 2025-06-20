@@ -40,11 +40,6 @@ const liveFullView = document.getElementById("liveFullView"); // can't change co
 const liveMaskView = document.getElementById("liveMaskView"); // div holding the video screen and face detection graphics.
 let enableWebcamButton; // type: HTMLButtonElement
 
-// smoothing declarations
-let smoothedX = 0,
-  smoothedY = 0,
-  smoothWidth = 0;
-
 // Check if webcam access is supported.
 const hasGetUserMedia = () => !!navigator.mediaDevices?.getUserMedia; // !! converts the result to true or false
 const hasZoom = () => !!navigator.mediaDevices.getSupportedConstraints().zoom; // true or false, has zoom? maybe not necessary cuz doing digital zoom
@@ -259,6 +254,10 @@ function displayVideoDetections(detections) {
 const TARGET_FACE_RATIO = 0.3; // Face height = 30% of frame height
 const SMOOTHING_FACTOR = 0.2; // For exponential moving average to smooth, aka how much you trust the new value
 
+// smoothing declarations
+let smoothedX = 0,
+  smoothedY = 0,
+  smoothWidth = 0;
 function processFrame(detections) {
   if (!detections || detections.length === 0) {
     // No face: need to gradually reset zoom instead of making it abrupt
@@ -280,10 +279,8 @@ function processFrame(detections) {
     smoothWidth = face.width;
   }
 
-  let smoothedX =
-    xCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedX;
-  let smoothedY =
-    yCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedY; // use old smoothed value to get new smoothed value. this gets a "ratio" where new smoothedY is made up w a little bit of the new value and most of the old
+  smoothedX = xCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedX;
+  smoothedY = yCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedY; // use old smoothed value to get new smoothed value. this gets a "ratio" where new smoothedY is made up w a little bit of the new value and most of the old
 
   // 2. calc zoom level
   let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
