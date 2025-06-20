@@ -168,7 +168,7 @@ async function predictWebcam() {
       didPositionChange(newFace, oldFace); // => then run processFrame within this func
       oldFace = newFace;
     }
-    // processFrame(detections);
+    processFrame(detections);
 
     frameCounter++;
   }
@@ -287,13 +287,14 @@ function processFrame(detections) {
     smoothedY = yCenter;
     smoothWidth = face.width;
   }
-
+  smoothWidth =
+    face.width * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedWidth;
   smoothedX = xCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedX;
   smoothedY = yCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedY; // use old smoothed value to get new smoothed value. this gets a "ratio" where new smoothedY is made up w a little bit of the new value and most of the old
 
   // 2. calc zoom level
   let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
-  let zoomScale = targetFacePixels / face.width; // how much should our face be scaled based on its current bounding box width?
+  let zoomScale = targetFacePixels / smoothed.width; // how much should our face be scaled based on its current bounding box width?
 
   console.log("got to drawing canvas with face: ", face);
   ctx.drawImage(
@@ -303,7 +304,7 @@ function processFrame(detections) {
     // cropped from source
     canvas.offsetWidth - smoothedX - canvas.width / (2 * zoomScale), // top left corner of crop in og vid
     smoothedY - canvas.height / (2 * zoomScale), // canvas.height / (2 * zoomScale) = half the height of the cropped area
-    canvas.width / zoomScale, // how wide a piece we're cropping from original vid
+    smoothWidth / zoomScale, // how wide a piece we're cropping from original vid
     canvas.height / zoomScale, // how tall
 
     // destination
@@ -312,8 +313,6 @@ function processFrame(detections) {
     canvas.width, // since canvas width/height is hardcoded to my video resolution, this maintains aspect ratio. should change this to update to whatever cam resolution rainbow uses.
     canvas.height
   );
-
-  // somehow store new position in new
 }
 
 // check if face position has changed enough to warrant tracking
