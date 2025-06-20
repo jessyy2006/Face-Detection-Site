@@ -267,7 +267,7 @@ const SMOOTHING_FACTOR = 0.2; // For exponential moving average to smooth, aka h
 let smoothedX = 0,
   smoothedY = 0,
   smoothedWidth = 0;
-
+const videoAspectRatio = videoFull.videoWidth / videoFull.videoHeight;
 function processFrame(detections) {
   console.log("got to processing canvas");
   if (!detections || detections.length === 0) {
@@ -297,6 +297,9 @@ function processFrame(detections) {
   let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
   let zoomScale = targetFacePixels / smoothedWidth; // how much should our face be scaled based on its current bounding box width?
 
+  const sourceWidth = smoothedWidth / zoomScale;
+  const sourceHeight = sourceWidth / videoAspectRatio;
+
   console.log("got to drawing canvas with face: ", face);
   ctx.drawImage(
     // source video
@@ -305,8 +308,8 @@ function processFrame(detections) {
     // cropped from source
     canvas.offsetWidth - smoothedX - canvas.width / (2 * zoomScale), // top left corner of crop in og vid
     smoothedY - canvas.height / (2 * zoomScale), // canvas.height / (2 * zoomScale) = half the height of the cropped area
-    smoothedWidth / zoomScale, // how wide a piece we're cropping from original vid
-    canvas.height / zoomScale, // how tall
+    sourceWidth, // how wide a piece we're cropping from original vid
+    sourceHeight, // how tall
 
     // destination
     0, // x coord for where on canvas to start drawing (left->right)
