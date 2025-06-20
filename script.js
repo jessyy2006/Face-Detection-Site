@@ -18,7 +18,7 @@ const initializefaceDetector = async () => {
       delegate: "GPU",
     },
     runningMode: runningMode,
-    minDetectionConfidence: 0.65,
+    minDetectionConfidence: 0.6,
   });
 };
 initializefaceDetector(); // returns promises
@@ -274,10 +274,6 @@ let smoothedX = 0,
 
 function processFrame(detections) {
   console.log("got to processing canvas");
-  if (!detections || detections.length === 0) {
-    // No face: need to gradually reset zoom instead of making it abrupt
-    return;
-  }
 
   // without smooth for now
   const face = detections[0].boundingBox; // most prom face -> get box.
@@ -302,7 +298,22 @@ function processFrame(detections) {
   smoothedZoom =
     zoomScale * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
 
+  // IF NO FACE:
+  if (!detections || detections.length === 0) {
+    // No face: need to gradually reset zoom instead of making it abrupt
+    // smoothedZoom -> 1
+    // smoothedX ->
+    // smoothedY ->
+    smoothedX = xCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedX;
+    smoothedY = yCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedY;
+    smoothedZoom =
+      zoomScale * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
+    return;
+  }
   console.log("got to drawing canvas with face: ", face);
+  console.log(`videoFull.videoWidth = ${videoFull.videoWidth}`);
+  console.log(`canvas.width = ${canvas.width}`);
+
   ctx.drawImage(
     // source video
     videoFull,
