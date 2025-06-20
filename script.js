@@ -136,15 +136,15 @@ videoZoom.addEventListener("loadedmetadata", async () => {
 
 // Recursive function to continuously track face
 let lastVideoTime = -1; // to make sure the func can start (-1 will never be equal to the video time)
+let frameCounter = 0;
+let oldFace = null;
+let detections = null;
 async function predictWebcam() {
   let startTimeMs = performance.now();
   // Detect faces using detectForVideo
   if (videoFull.currentTime !== lastVideoTime) {
     lastVideoTime = videoFull.currentTime;
-    const detections = faceDetector.detectForVideo(
-      videoFull,
-      startTimeMs
-    ).detections;
+    detections = faceDetector.detectForVideo(videoFull, startTimeMs).detections;
     // above line returns an object w params: {
     //   detections: [/* array of detected faces */],
     //   timestampMs: 123456789 // processing timestamp
@@ -156,20 +156,28 @@ async function predictWebcam() {
     displayVideoDetections(detections); // calling func below using the face positions/landmarks in pixel coordinates stored in "detections" => VISUALIZES DETECTIONS. since mediapipe orders the most prominently detected face first, detections[0] is the most obvious face.
     console.log("got to detections");
 
-    // const facePosition = detections[0].boundingBox; // most prom face -> get box.
+    const newFace = detections[0].boundingBox;
 
-    // if (didPositionChange(facePosition)) {
-    //   //processFrame
-    // }
-    processFrame(detections);
-    console.log("got to processing canvas");
+    if (frameCounter % 20 === 0) {
+      if (!oldFace) {
+        // checks if it is !null = !false = true
+        oldFace = newFace;
+      }
+
+      // every 20 frames, including first
+      didPositionChange(newFace, oldFace); // => then run processFrame within this func
+      oldFace = newFace;
+    }
+    // processFrame(detections);
+
+    frameCounter++;
   }
 
   // Call this function again to keep predicting when the browser is ready
   window.requestAnimationFrame(predictWebcam);
 }
 
-// VISUALIZES DETECTIONS for each frame
+// VISUALIZES DETECTIONS for each frame. this code is still for detecting multiple people.
 function displayVideoDetections(detections) {
   // detections is an array of Detection[]
 
@@ -258,7 +266,9 @@ const SMOOTHING_FACTOR = 0.2; // For exponential moving average to smooth, aka h
 let smoothedX = 0,
   smoothedY = 0,
   smoothWidth = 0;
+
 function processFrame(detections) {
+  console.log("got to processing canvas");
   if (!detections || detections.length === 0) {
     // No face: need to gradually reset zoom instead of making it abrupt
     return;
@@ -271,7 +281,6 @@ function processFrame(detections) {
   let yCenter = face.originY + face.height / 2; // current raw value
 
   // 1. Smooth face position (EMA)
-
   // Initialize on first detection so isn't initialized to 0
   if (smoothWidth === 0) {
     smoothedX = xCenter;
@@ -303,10 +312,30 @@ function processFrame(detections) {
     canvas.width, // since canvas width/height is hardcoded to my video resolution, this maintains aspect ratio. should change this to update to whatever cam resolution rainbow uses.
     canvas.height
   );
+
+  // somehow store new position in new
 }
 
 // check if face position has changed enough to warrant tracking
-function didPositionChange(face) {}
+function didPositionChange(newFace, oldFace) {
+  const thresholdX = canvas.width * 0.05; // 5% of the width
+  const thresholdY = canvas.height * 0.05; // 5% of the height
+
+  const zoomRatio = newFace.width / oldFace.width;
+  const zoomThreshold = 0.05; // allow 5% zoom change before reacting
+
+  if (
+    abs(newFace.originX - oldFace.originX) > thresholdX ||
+    abs(newFace.originY - oldFace.originY) > thresholdY
+  ) {
+    // if position OR distance from cam changed a lot
+    processFrame(detections);
+  } else if (Math.abs(1 - zoomRatio) > zoomThreshold) {
+    processFrame(detections);
+  } else {
+    return; // exit
+  }
+}
 
 // issues:
 // 1. doesn't stop me from going offscreen
@@ -322,4 +351,5 @@ function didPositionChange(face) {}
 
 // - Don't move the zoom window with each frame; wait until there is a significant difference in position for a few frames (10/20/30 frames?) before moving it.
 
+// ADDRESSED:
 // - Don't move your window “abruptly”; instead, try to do a kind of smooth tracking/zoom (smooth it out over several frames (the number of which is to be determined)
