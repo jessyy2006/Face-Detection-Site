@@ -138,13 +138,16 @@ videoZoom.addEventListener("loadedmetadata", async () => {
 let lastVideoTime = -1; // to make sure the func can start (-1 will never be equal to the video time)
 let frameCounter = 0;
 let refFace = null;
-let detections = null;
+
 async function predictWebcam() {
   let startTimeMs = performance.now();
   // Detect faces using detectForVideo
   if (videoFull.currentTime !== lastVideoTime) {
     lastVideoTime = videoFull.currentTime;
-    detections = faceDetector.detectForVideo(videoFull, startTimeMs).detections;
+    const detections = faceDetector.detectForVideo(
+      videoFull,
+      startTimeMs
+    ).detections;
     // above line returns an object w params: {
     //   detections: [/* array of detected faces */],
     //   timestampMs: 123456789 // processing timestamp
@@ -156,7 +159,7 @@ async function predictWebcam() {
     displayVideoDetections(detections); // calling func below using the face positions/landmarks in pixel coordinates stored in "detections" => VISUALIZES DETECTIONS. since mediapipe orders the most prominently detected face first, detections[0] is the most obvious face.
     console.log("got to detections");
 
-    const newFace = detections[0].boundingBox;
+    // const newFace = detections[0].boundingBox;
 
     // if (frameCounter % 10 === 0) {
     //   // every 10 frames
@@ -291,7 +294,7 @@ function processFrame(detections) {
   smoothedX = xCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedX;
   smoothedY = yCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedY; // use old smoothed value to get new smoothed value. this gets a "ratio" where new smoothedY is made up w a little bit of the new value and most of the old
 
-  // 2. calc zoom level
+  // 2. calc zoom levelAdd commentMore actions
   let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
   let zoomScale = targetFacePixels / face.width; // how much should our face be scaled based on its current bounding box width?
 
