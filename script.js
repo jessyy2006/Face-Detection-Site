@@ -264,7 +264,7 @@ function displayVideoDetections(detections) {
 
 // Configuration for face tracking mechanism
 const TARGET_FACE_RATIO = 0.3; // Face height = 30% of frame height
-const SMOOTHING_FACTOR = 0.2; // For exponential moving average to smooth, aka how much you trust the new value
+const SMOOTHING_FACTOR = 0.1; // For exponential moving average to smooth, aka how much you trust the new value
 
 // smoothing declarations
 let smoothedX = 0,
@@ -300,7 +300,7 @@ function processFrame(detections) {
   let zoomScale = targetFacePixels / face.width; // how much should our face be scaled based on its current bounding box width?
 
   smoothedZoom =
-    zoomScale * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * zoomScale;
+    zoomScale * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
 
   console.log("got to drawing canvas with face: ", face);
   ctx.drawImage(
