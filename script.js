@@ -325,8 +325,8 @@ function didPositionChange(newFace, oldFace) {
   const zoomThreshold = 0.05; // allow 5% zoom change before reacting
 
   if (
-    abs(newFace.originX - oldFace.originX) > thresholdX ||
-    abs(newFace.originY - oldFace.originY) > thresholdY
+    Math.abs(newFace.originX - oldFace.originX) > thresholdX ||
+    Math.abs(newFace.originY - oldFace.originY) > thresholdY
   ) {
     // if position OR distance from cam changed a lot
     processFrame(detections);
