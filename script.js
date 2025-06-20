@@ -298,7 +298,7 @@ function processFrame(detections) {
   smoothedZoom =
     zoomScale * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
 
-  // IF NO FACE:
+  // IF NO FACE: (after this first change, it doesnt even go back to being fixed after i reveal face afaub)
   if (!detections || detections.length === 0) {
     // No face: need to gradually reset zoom instead of making it abrupt
     // smoothedZoom -> 1 (no zoom)
@@ -312,7 +312,7 @@ function processFrame(detections) {
       (videoFull.videoHeight / 2) * SMOOTHING_FACTOR +
       (1 - SMOOTHING_FACTOR) * smoothedY;
     smoothedZoom = 1 * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
-
+    console.log("detected no face, iterating now: ", face);
     return;
   }
 
