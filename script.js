@@ -266,8 +266,8 @@ const SMOOTHING_FACTOR = 0.2; // For exponential moving average to smooth, aka h
 // smoothing declarations
 let smoothedX = 0,
   smoothedY = 0,
-  smoothedWidth = 0;
-const videoAspectRatio = videoFull.videoWidth / videoFull.videoHeight;
+  smoothWidth;
+
 function processFrame(detections) {
   console.log("got to processing canvas");
   if (!detections || detections.length === 0) {
@@ -283,22 +283,17 @@ function processFrame(detections) {
 
   // 1. Smooth face position (EMA)
   // Initialize on first detection so isn't initialized to 0
-  if (smoothedWidth === 0) {
+  if (smoothWidth === 0) {
     smoothedX = xCenter;
     smoothedY = yCenter;
-    smoothedWidth = face.width;
   }
-  smoothedWidth =
-    face.width * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedWidth;
+
   smoothedX = xCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedX;
   smoothedY = yCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedY; // use old smoothed value to get new smoothed value. this gets a "ratio" where new smoothedY is made up w a little bit of the new value and most of the old
 
   // 2. calc zoom level
   let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
-  let zoomScale = targetFacePixels / smoothedWidth; // how much should our face be scaled based on its current bounding box width?
-
-  const sourceWidth = smoothedWidth / zoomScale;
-  const sourceHeight = sourceWidth / videoAspectRatio;
+  let zoomScale = targetFacePixels / face.width; // how much should our face be scaled based on its current bounding box width?
 
   console.log("got to drawing canvas with face: ", face);
   ctx.drawImage(
@@ -308,8 +303,8 @@ function processFrame(detections) {
     // cropped from source
     canvas.offsetWidth - smoothedX - canvas.width / (2 * zoomScale), // top left corner of crop in og vid
     smoothedY - canvas.height / (2 * zoomScale), // canvas.height / (2 * zoomScale) = half the height of the cropped area
-    sourceWidth, // how wide a piece we're cropping from original vid
-    sourceHeight, // how tall
+    canvas.width / zoomScale, // how wide a piece we're cropping from original vid
+    canvas.height / zoomScale, // how tall
 
     // destination
     0, // x coord for where on canvas to start drawing (left->right)
