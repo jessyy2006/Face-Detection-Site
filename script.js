@@ -269,7 +269,8 @@ const SMOOTHING_FACTOR = 0.2; // For exponential moving average to smooth, aka h
 // smoothing declarations
 let smoothedX = 0,
   smoothedY = 0,
-  smoothWidth;
+  smoothedZoom = 0,
+  firstDetection = true;
 
 function processFrame(detections) {
   console.log("got to processing canvas");
@@ -286,7 +287,7 @@ function processFrame(detections) {
 
   // 1. Smooth face position (EMA)
   // Initialize on first detection so isn't initialized to 0
-  if (smoothWidth === 0) {
+  if (firstDetection) {
     smoothedX = xCenter;
     smoothedY = yCenter;
   }
@@ -294,9 +295,12 @@ function processFrame(detections) {
   smoothedX = xCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedX;
   smoothedY = yCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedY; // use old smoothed value to get new smoothed value. this gets a "ratio" where new smoothedY is made up w a little bit of the new value and most of the old
 
-  // 2. calc zoom levelAdd commentMore actions
+  // 2. calc zoom level
   let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
   let zoomScale = targetFacePixels / face.width; // how much should our face be scaled based on its current bounding box width?
+
+  smoothedZoom =
+    zoomScale * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * zoomScale;
 
   console.log("got to drawing canvas with face: ", face);
   ctx.drawImage(
@@ -304,10 +308,10 @@ function processFrame(detections) {
     videoFull,
 
     // cropped from source
-    videoFull.videoWidth - smoothedX - canvas.width / (2 * zoomScale), // top left corner of crop in og vid
-    smoothedY - canvas.height / (2 * zoomScale), // canvas.height / (2 * zoomScale) = half the height of the cropped area
-    canvas.width / zoomScale, // how wide a piece we're cropping from original vid
-    canvas.height / zoomScale, // how tall
+    videoFull.videoWidth - smoothedX - canvas.width / (2 * smoothedZoom), // top left corner of crop in og vid
+    smoothedY - canvas.height / (2 * smoothedZoom), // canvas.height / (2 * zoomScale) = half the height of the cropped area
+    canvas.width / smoothedZoom, // how wide a piece we're cropping from original vid
+    canvas.height / smoothedZoom, // how tall
 
     // destination
     0, // x coord for where on canvas to start drawing (left->right)
