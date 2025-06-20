@@ -273,33 +273,33 @@ let smoothedX = 0,
   firstDetection = true;
 
 function processFrame(detections) {
-  console.log("got to processing canvas");
-  // EMA formula: smoothedY = targetY * α + smoothedY * (1 - α)
+  if (detections && detections.length > 0) {
+    const face = detections[0].boundingBox; // most prom face -> get box.
 
-  const face = detections[0].boundingBox; // most prom face -> get box.
+    console.log("got to processing canvas");
+    // EMA formula: smoothedY = targetY * α + smoothedY * (1 - α)
 
-  let xCenter = face.originX + face.width / 2;
-  let yCenter = face.originY + face.height / 2; // current raw value
+    let xCenter = face.originX + face.width / 2;
+    let yCenter = face.originY + face.height / 2; // current raw value
 
-  // 1. Smooth face position (EMA)
-  // Initialize on first detection so isn't initialized to 0
-  if (firstDetection) {
-    smoothedX = xCenter;
-    smoothedY = yCenter;
-  }
+    // 1. Smooth face position (EMA)
+    // Initialize on first detection so isn't initialized to 0
+    if (firstDetection) {
+      smoothedX = xCenter;
+      smoothedY = yCenter;
+    }
 
-  smoothedX = xCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedX;
-  smoothedY = yCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedY; // use old smoothed value to get new smoothed value. this gets a "ratio" where new smoothedY is made up w a little bit of the new value and most of the old
+    smoothedX = xCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedX;
+    smoothedY = yCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedY; // use old smoothed value to get new smoothed value. this gets a "ratio" where new smoothedY is made up w a little bit of the new value and most of the old
 
-  // 2. calc zoom level
-  let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
-  let zoomScale = targetFacePixels / face.width; // how much should our face be scaled based on its current bounding box width?
+    // 2. calc zoom level
+    let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
+    let zoomScale = targetFacePixels / face.width; // how much should our face be scaled based on its current bounding box width?
 
-  smoothedZoom =
-    zoomScale * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
-
-  // IF NO FACE: (after this first change, it doesnt even go back to being fixed after i reveal face afaub)
-  if (!detections || detections.length === 0) {
+    smoothedZoom =
+      zoomScale * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
+  } else {
+    // IF NO FACE: (after this first change, it doesnt even go back to being fixed after i reveal face. because on line 279, boundingbox doesn't exist. )
     // No face: need to gradually reset zoom instead of making it abrupt
     // smoothedZoom -> 1 (no zoom)
     // smoothedX -> videoFull.videoWidth / 2 (center of the video frame)
@@ -313,7 +313,6 @@ function processFrame(detections) {
       (1 - SMOOTHING_FACTOR) * smoothedY;
     smoothedZoom = 1 * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
     console.log("detected no face, iterating now: ", face);
-    return;
   }
 
   console.log("got to drawing canvas with face: ", face);
