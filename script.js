@@ -40,6 +40,11 @@ const liveFullView = document.getElementById("liveFullView"); // can't change co
 const liveMaskView = document.getElementById("liveMaskView"); // div holding the video screen and face detection graphics.
 let enableWebcamButton; // type: HTMLButtonElement
 
+// smoothing declarations
+let smoothedX = 0,
+  smoothedY = 0,
+  smoothWidth = 0;
+
 // Check if webcam access is supported.
 const hasGetUserMedia = () => !!navigator.mediaDevices?.getUserMedia; // !! converts the result to true or false
 const hasZoom = () => !!navigator.mediaDevices.getSupportedConstraints().zoom; // true or false, has zoom? maybe not necessary cuz doing digital zoom
@@ -253,11 +258,6 @@ function displayVideoDetections(detections) {
 // Configuration for face tracking mechanism
 const TARGET_FACE_RATIO = 0.3; // Face height = 30% of frame height
 const SMOOTHING_FACTOR = 0.2; // For exponential moving average to smooth, aka how much you trust the new value
-
-// State
-let smoothedX = 0,
-  smoothedY = 0,
-  smoothWidth = 0;
 
 function processFrame(detections) {
   if (!detections || detections.length === 0) {
