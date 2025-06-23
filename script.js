@@ -316,13 +316,7 @@ function processFrame(detections) {
     // 1. if detects face again after not detecting it for a while, it's an immediate jump back.
     // 2. works better for when i'm very zoomed in (distance = far) than when i'm zoomed out (distance close). it jumps around a lot when i'm zoomed out. this doesn't need fixing though, as I need to make sure zooming out (with the pic duplicates around me) doesn't happen period.
 
-    smoothedX =
-      (videoFull.videoWidth / 2) * SMOOTHING_FACTOR +
-      (1 - SMOOTHING_FACTOR) * smoothedX;
-    smoothedY =
-      (videoFull.videoHeight / 2) * SMOOTHING_FACTOR +
-      (1 - SMOOTHING_FACTOR) * smoothedY;
-    smoothedZoom = 1 * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
+    zoomReset();
     console.log("detected no face, iterating now: ");
   }
 
@@ -342,6 +336,16 @@ function processFrame(detections) {
     canvas.width, // since canvas width/height is hardcoded to my video resolution, this maintains aspect ratio. should change this to update to whatever cam resolution rainbow uses.
     canvas.height
   );
+}
+
+function zoomReset() {
+  smoothedX =
+    (videoFull.videoWidth / 2) * SMOOTHING_FACTOR +
+    (1 - SMOOTHING_FACTOR) * smoothedX;
+  smoothedY =
+    (videoFull.videoHeight / 2) * SMOOTHING_FACTOR +
+    (1 - SMOOTHING_FACTOR) * smoothedY;
+  smoothedZoom = 1 * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
 }
 
 // // check if face position has changed enough to warrant tracking
