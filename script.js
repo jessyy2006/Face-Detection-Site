@@ -296,17 +296,17 @@ function processFrame(detections) {
     let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
     let zoomScale = targetFacePixels / face.width; // how much should our face be scaled based on its current bounding box width
 
+    // edge case 1: locking zoom at 1 when face comes really close.
     if (zoomScale >= 1) {
       smoothedZoom =
         zoomScale * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
       console.log("smoothed Zoom ok: ", smoothedZoom);
     } else {
       zoomReset(); // reset zoom to 1
-
       console.log("smoothed Zoom = 1");
     }
 
-    // edge case 1: first detection of face
+    // edge case 2: first detection of face = avoid blooming projection onto canvas
     if (firstDetection) {
       //  need to fix: when cam aimed too high or too low, theres black in the parts of the canvas that the cropping wasn't able to fill
       smoothedX = videoFull.videoWidth / 2;
@@ -329,6 +329,16 @@ function processFrame(detections) {
     console.log("detected no face, iterating now: ");
   }
 
+  // edgecase 3: avoid image stacking/black space when crop is smaller than canvas
+  let cropWidth = canvas.width / smoothedZoom;
+  let cropHeight = canvas.height / smoothedZoom;
+  /* if canvas width < videofull, will have stacking or black space. to fix, make sure cavas widte => videofull, and if not, lock it to = videofull. then call zoomreset? no, not necessary because this just catches it as soon as it goes, per frame.
+   */
+  if (cropWidth < canvas.width || cropHeight < canvas.height) {
+    cropWidth = canvas.width; // fills up canvas. but can only do this SUCH THAT THE ASPECT RATIO IS RIGYHT, SO FIX.
+    cropWidth = canvas.height;
+  }
+
   ctx.drawImage(
     // source video
     videoFull,
@@ -336,7 +346,7 @@ function processFrame(detections) {
     // cropped from source
     smoothedX - canvas.width / (2 * smoothedZoom), // top left corner of crop in og vid. no mirroring in this math because want to cam to center person, not just track.
     smoothedY - canvas.height / (2 * smoothedZoom), // canvas.height / (2 * zoomScale) = half the height of the cropped area
-    canvas.width / smoothedZoom, // how wide a piece we're cropping from original vid
+    cropWidth, // how wide a piece we're cropping from original vid
     canvas.height / smoothedZoom, // how tall
 
     // destination
