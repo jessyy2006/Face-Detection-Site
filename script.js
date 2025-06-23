@@ -332,11 +332,12 @@ function processFrame(detections) {
   // edgecase 3: avoid image stacking/black space when crop is smaller than canvas
   let cropWidth = canvas.width / smoothedZoom;
   let cropHeight = canvas.height / smoothedZoom;
-  /* if canvas width < videofull, will have stacking or black space. to fix, make sure cavas widte => videofull, and if not, lock it to = videofull. then call zoomreset? no, not necessary because this just catches it as soon as it goes, per frame.
-   */
+  console.log(`crop width = ${cropWidth}, cropHeight = ${cropHeight}`);
+  // /* if canvas width < videofull, will have stacking or black space. to fix, make sure cavas widte => videofull, and if not, lock it to = videofull. then call zoomreset? no, not necessary because this just catches it as soon as it goes, per frame.
+  //  */
   if (cropWidth < canvas.width || cropHeight < canvas.height) {
     cropWidth = canvas.width; // fills up canvas. but can only do this SUCH THAT THE ASPECT RATIO IS RIGYHT, SO FIX.
-    cropWidth = canvas.height;
+    cropHeight = canvas.height;
   }
 
   ctx.drawImage(
