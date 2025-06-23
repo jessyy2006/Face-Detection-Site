@@ -334,8 +334,8 @@ function processFrame(detections) {
     videoFull,
 
     // cropped from source
-    smoothedX - canvas.width / (2 * smoothedZoom), //videoFull.videoWidth - smoothedX - canvas.width / (2 * smoothedZoom), // top left corner of crop in og vid
-    smoothedY - canvas.height / (2 * smoothedZoom), // smoothedY - canvas.height / (2 * smoothedZoom), // canvas.height / (2 * zoomScale) = half the height of the cropped area
+    smoothedX - canvas.width / (2 * smoothedZoom), // top left corner of crop in og vid. no mirroring in this math because want to cam to center person, not just track.
+    smoothedY - canvas.height / (2 * smoothedZoom), // canvas.height / (2 * zoomScale) = half the height of the cropped area
     canvas.width / smoothedZoom, // how wide a piece we're cropping from original vid
     canvas.height / smoothedZoom, // how tall
 
