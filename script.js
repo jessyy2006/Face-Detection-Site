@@ -326,7 +326,7 @@ function processFrame(detections) {
     // main issues:
     // 1. if detects face again after not detecting it for a while, it's an immediate jump back. add smth so that when face is detected again, it slowly transitions into the real smoohtedX, smoothedZoom
     // 2. works better for when i'm very zoomed in (distance = far) than when i'm zoomed out (distance close). it jumps around a lot when i'm zoomed out. this doesn't need fixing though, as I need to make sure zooming out (with the pic duplicates around me) doesn't happen period.
-
+    // not sure just test
     zoomReset();
     console.log("detected no face, iterating now: ");
   }
