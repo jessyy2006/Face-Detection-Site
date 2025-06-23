@@ -296,16 +296,6 @@ function processFrame(detections) {
     let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
     let zoomScale = targetFacePixels / face.width; // how much should our face be scaled based on its current bounding box width
 
-    // edge case 1: first detection of face
-    if (firstDetection) {
-      // smoothedX = xCenter;
-      // smoothedY = yCenter;
-      smoothedX = videoFull.videoWidth / 2;
-      smoothedY = videoFull.videoHeight / 2;
-      smoothedZoom = 1;
-      firstDetection = false;
-    }
-
     if (zoomScale >= 1) {
       smoothedZoom =
         zoomScale * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
@@ -316,6 +306,14 @@ function processFrame(detections) {
       console.log("smoothed Zoom = 1");
     }
 
+    // edge case 1: first detection of face
+    if (firstDetection) {
+      //  need to fix: when cam aimed too high or too low, theres black in the parts of the canvas that the cropping wasn't able to fill
+      smoothedX = videoFull.videoWidth / 2;
+      smoothedY = videoFull.videoHeight / 2;
+      smoothedZoom = 1;
+      firstDetection = false;
+    }
     console.log("got to drawing canvas with face: ", face);
   } else {
     // IF NO FACE:
@@ -326,7 +324,7 @@ function processFrame(detections) {
     // main issues:
     // 1. if detects face again after not detecting it for a while, it's an immediate jump back. add smth so that when face is detected again, it slowly transitions into the real smoohtedX, smoothedZoom
     // 2. works better for when i'm very zoomed in (distance = far) than when i'm zoomed out (distance close). it jumps around a lot when i'm zoomed out. this doesn't need fixing though, as I need to make sure zooming out (with the pic duplicates around me) doesn't happen period.
-    // not sure just test
+
     zoomReset();
     console.log("detected no face, iterating now: ");
   }
