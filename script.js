@@ -348,7 +348,7 @@ function processFrame(detections) {
     smoothedX - canvas.width / (2 * smoothedZoom), // top left corner of crop in og vid. no mirroring in this math because want to cam to center person, not just track.
     smoothedY - canvas.height / (2 * smoothedZoom), // canvas.height / (2 * zoomScale) = half the height of the cropped area
     cropWidth, // how wide a piece we're cropping from original vid
-    canvas.height / smoothedZoom, // how tall
+    cropHeight, // how tall
 
     // destination
     0, // x coord for where on canvas to start drawing (left->right)
