@@ -335,10 +335,14 @@ function processFrame(detections) {
   let topLeftX = smoothedX - cropWidth / 2,
     topLeftY = smoothedY - cropHeight / 2;
 
-  topLeftX = Math.max(0, topLeftX);
+  topLeftX = Math.max(0, topLeftX); // sometimes is accessing areas outside of video element i think
   topLeftY = Math.max(0, topLeftY);
+
+  // do the same with bottom and left
+  // ex. left corner is in bounds BUT width - leftX < cropwidth so stacking on the left. to fix,
+
   console.log(
-    `crop width = ${cropWidth}, cropHeight = ${cropHeight}, topleftX = ${topLeftX},topleftY = ${topLeftY}`
+    `crop width = ${cropWidth}, cropHeight = ${cropHeight}, topleftX = ${topLeftX},topleftY = ${topLeftY}, videowidth = ${videoFull.width}, videoVIDEOwidth = ${videoFull.videoWidth}`
   );
   // /* if canvas width < videofull, will have stacking or black space. to fix, make sure cavas widte => videofull, and if not, lock it to = videofull. then call zoomreset? no, not necessary because this just catches it as soon as it goes, per frame.
   //  */
