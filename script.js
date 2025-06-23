@@ -335,8 +335,14 @@ function processFrame(detections) {
   let topLeftX = smoothedX - cropWidth / 2,
     topLeftY = smoothedY - cropHeight / 2;
 
-  topLeftX = Math.max(0, topLeftX); // sometimes is accessing areas outside of video element i think
-  topLeftY = Math.max(0, topLeftY);
+  // topLeftX = Math.max(0, topLeftX); // sometimes is accessing areas outside of video element i think
+  // topLeftY = Math.max(0, topLeftY);
+
+  topLeftX = Math.max(0, Math.min(topLeftX, videoFull.videoWidth - cropWidth));
+  topLeftY = Math.max(
+    0,
+    Math.min(topLeftY, videoFull.videoHeight - cropHeight)
+  );
 
   // do the same with bottom and left
   // ex. left corner is in bounds BUT width - leftX < cropwidth so stacking on the left. to fix,
