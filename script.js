@@ -285,22 +285,25 @@ function processFrame(detections) {
     console.log("got to processing canvas");
     // EMA formula: smoothedY = targetY * α + smoothedY * (1 - α)
 
-    let xCenter = face.originX + face.width / 2;
+    let xCenter = face.originX + face.width / 2; // x center of face
     let yCenter = face.originY + face.height / 2; // current raw value
 
     // 1. Smooth face position (EMA)
-    // Initialize on first detection so isn't initialized to 0
-    if (firstDetection) {
-      smoothedX = xCenter;
-      smoothedY = yCenter;
-    }
-
     smoothedX = xCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedX;
     smoothedY = yCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedY; // use old smoothed value to get new smoothed value. this gets a "ratio" where new smoothedY is made up w a little bit of the new value and most of the old
 
     // 2. calc zoom level
     let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
     let zoomScale = targetFacePixels / face.width; // how much should our face be scaled based on its current bounding box width
+
+    // edge case 1: first detection of face
+    if (firstDetection) {
+      // smoothedX = xCenter;
+      // smoothedY = yCenter;
+      smoothedX = videoFull.videoWidth / 2;
+      smoothedY = videoFull.videoHeight / 2;
+      smoothedZoom = 1;
+    }
 
     if (zoomScale >= 1) {
       smoothedZoom =
