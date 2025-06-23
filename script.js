@@ -334,7 +334,9 @@ function processFrame(detections) {
   let cropHeight = canvas.height / smoothedZoom;
   let topLeftX = smoothedX - canvas.width / (2 * smoothedZoom);
   let topLeftY = smoothedY - canvas.height / (2 * smoothedZoom);
-  console.log(`crop width = ${cropWidth}, cropHeight = ${cropHeight}`);
+  console.log(
+    `crop width = ${cropWidth}, cropHeight = ${cropHeight}, topleftX = ${topLeftX},topleftY = ${topLeftY}`
+  );
   // /* if canvas width < videofull, will have stacking or black space. to fix, make sure cavas widte => videofull, and if not, lock it to = videofull. then call zoomreset? no, not necessary because this just catches it as soon as it goes, per frame.
   //  */
   // if (cropWidth < canvas.width || cropHeight < canvas.height) {
