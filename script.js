@@ -311,15 +311,6 @@ function processFrame(detections) {
     }
     console.log("got to drawing canvas with face: ", face);
   } else {
-    // IF NO FACE:
-    // smoothedZoom -> 1 (no zoom)
-    // smoothedX -> videoFull.videoWidth / 2 (center of the video frame)
-    // smoothedY -> videoFull.videoHeight / 2
-
-    // main issues:
-    // 1. if detects face again after not detecting it for a while, it's an immediate jump back. add smth so that when face is detected again, it slowly transitions into the real smoohtedX, smoothedZoom
-    // 2. works better for when i'm very zoomed in (distance = far) than when i'm zoomed out (distance close). it jumps around a lot when i'm zoomed out. this doesn't need fixing though, as I need to make sure zooming out (with the pic duplicates around me) doesn't happen period.
-
     zoomReset();
     console.log("detected no face, iterating now: ");
   }
@@ -390,18 +381,14 @@ function zoomReset() {
 // }
 
 // issues:
-// 1. doesn't stop me from going offscreen
-// 2. duplicate pictures when come close to camera (need to add a lower bound on face framing...maybe no zoom at all once face is filling frame to a certain point, just tracking ?)
-// 3. if start close to camera, drawImage projects a smaller - than - canvas video that only increases as i move back and fill up the frame...prob has something to do with canvas sizing / drawImage setup
-// 4. very choppy animation and very jittery, add smoothing
-// 5. if face isn't recognizable, zoom autoresets, which can be jarring. maybe a slow return to 100% canvas fill w video? this can also be changed by changing the confidence bound for face detection, but runs the risk of detecting things that aren't faces at all/poor detection
+// 1. doesn't stop me from going offscreen...should i do the masking thing that mathieu showed me on google meet?
 // 6. when person leaves frame, camera freezes on wherever the face was last seen...like #5, figure out a way to smoothly transition back to just the full video stream w no zoom
 // 7. when another person enters frame and both faces are equally visible (one isn't very far in back), because processFrame() only creates face based on the most "prominent face", if both are oscillating between being equally as promiminent with every small movement, the camera zoom jumps around. Solve: could just remove all detections from detections array except for first one every time it detects face (every frame) so it literally can only adapt to the first person it sees...? not sure act.
 
 // mathieu's issues:
-// - Managing model errors (when your model is talking nonsense or when it doesn't detect anything at all): when the results returned by your model are too different from one frame to another, keep the current position of your zoom window.
 
 // - Don't move the zoom window with each frame; wait until there is a significant difference in position for a few frames (10/20/30 frames?) before moving it.
 
 // ADDRESSED:
 // - Don't move your window “abruptly”; instead, try to do a kind of smooth tracking/zoom (smooth it out over several frames (the number of which is to be determined)
+// - Managing model errors (when your model is talking nonsense or when it doesn't detect anything at all): when the results returned by your model are too different from one frame to another, keep the current position of your zoom window.
