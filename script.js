@@ -264,7 +264,7 @@ function displayVideoDetections(detections) {
 
 // Configuration for face tracking mechanism
 const TARGET_FACE_RATIO = 0.3; // Face height = 30% of frame height
-const SMOOTHING_FACTOR = 0.1; // For exponential moving average to smooth, aka how much you trust the new value
+const SMOOTHING_FACTOR = 0.05; // For exponential moving average to smooth, aka how much you trust the new value
 
 // smoothing and drawing declarations
 let smoothedX = 0,
@@ -275,11 +275,7 @@ let smoothedX = 0,
 function processFrame(detections) {
   if (detections && detections.length > 0) {
     // if there is a face
-    // jump back from smooth reset here, maybe use a boolean to check if was previously using zoomReset or not
-    /*
-    if zoom reset TRUE:
-      formula: smoothedY = targetY * α + smoothedY * (1 - α) -> but isnt this what i'm alr doing?
-    */
+
     const face = detections[0].boundingBox; // most prom face -> get box.
 
     console.log("got to processing canvas");
@@ -308,7 +304,6 @@ function processFrame(detections) {
 
     // edge case 2: first detection of face = avoid blooming projection onto canvas
     if (firstDetection) {
-      //  need to fix: when cam aimed too high or too low, theres black in the parts of the canvas that the cropping wasn't able to fill
       smoothedX = videoFull.videoWidth / 2;
       smoothedY = videoFull.videoHeight / 2;
       smoothedZoom = 1;
