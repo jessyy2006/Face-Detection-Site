@@ -294,10 +294,17 @@ function processFrame(detections) {
 
     // 2. calc zoom level
     let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
-    let zoomScale = targetFacePixels / face.width; // how much should our face be scaled based on its current bounding box width?
+    let zoomScale = targetFacePixels / face.width; // how much should our face be scaled based on its current bounding box width
 
-    smoothedZoom =
-      zoomScale * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
+    if (zoomScale >= 1) {
+      smoothedZoom =
+        zoomScale * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
+      console.log("smoothed Zoom ok: ", smoothedZoom);
+    } else {
+      smoothedZoom = 1;
+      console.log("smoothed Zoom = 1");
+    }
+
     console.log("got to drawing canvas with face: ", face);
   } else {
     // IF NO FACE:
