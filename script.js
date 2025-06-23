@@ -303,6 +303,7 @@ function processFrame(detections) {
       smoothedX = videoFull.videoWidth / 2;
       smoothedY = videoFull.videoHeight / 2;
       smoothedZoom = 1;
+      firstDetection = false;
     }
 
     if (zoomScale >= 1) {
