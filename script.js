@@ -332,8 +332,11 @@ function processFrame(detections) {
   // edgecase 3: avoid image stacking/black space when crop is smaller than canvas
   let cropWidth = canvas.width / smoothedZoom;
   let cropHeight = canvas.height / smoothedZoom;
-  let topLeftX = smoothedX - canvas.width / (2 * smoothedZoom);
-  let topLeftY = smoothedY - canvas.height / (2 * smoothedZoom);
+  // let topLeftX = smoothedX - cropWidth / 2; // fix cuz rn it's negative
+  // let topLeftY = smoothedY - cropHeight / 2;
+
+  let topLeftX = Math.max(0, Math.min(topLeftX, videoFull.width - cropWidth));
+  let topLeftY = Math.max(0, Math.min(topLeftY, videoFull.width - cropHeight));
   console.log(
     `crop width = ${cropWidth}, cropHeight = ${cropHeight}, topleftX = ${topLeftX},topleftY = ${topLeftY}`
   );
