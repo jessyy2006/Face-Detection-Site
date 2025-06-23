@@ -336,7 +336,7 @@ function processFrame(detections) {
     topLeftY = smoothedY - cropHeight / 2;
 
   topLeftX = Math.max(0, Math.min(topLeftX, videoFull.width - cropWidth));
-  topLeftY = Math.max(0, Math.min(topLeftY, videoFull.width - cropHeight));
+  topLeftY = Math.max(0, Math.min(topLeftY, videoFull.height - cropHeight));
   console.log(
     `crop width = ${cropWidth}, cropHeight = ${cropHeight}, topleftX = ${topLeftX},topleftY = ${topLeftY}`
   );
