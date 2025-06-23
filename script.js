@@ -270,9 +270,7 @@ const SMOOTHING_FACTOR = 0.1; // For exponential moving average to smooth, aka h
 let smoothedX = 0,
   smoothedY = 0,
   smoothedZoom = 0,
-  firstDetection = true,
-  topLeftX = 0,
-  topLeftY = 0;
+  firstDetection = true;
 
 function processFrame(detections) {
   if (detections && detections.length > 0) {
@@ -334,6 +332,8 @@ function processFrame(detections) {
   // edgecase 3: avoid image stacking/black space when crop is smaller than canvas
   let cropWidth = canvas.width / smoothedZoom;
   let cropHeight = canvas.height / smoothedZoom;
+  let topLeftX = smoothedX - cropWidth / 2,
+    topLeftY = smoothedY - cropHeight / 2;
 
   topLeftX = Math.max(0, Math.min(topLeftX, videoFull.width - cropWidth));
   topLeftY = Math.max(0, Math.min(topLeftY, videoFull.width - cropHeight));
