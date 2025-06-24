@@ -333,7 +333,7 @@ function processFrame(detections) {
 
     console.log("got to processing canvas");
   } else {
-    zoomReset(); // remove or nah? ALSO: make the transition between this smoother. if detected, then not detected, then detected (usntable detection), make sure it doesn't jump between zooms weirdly
+    // zoomReset(); // remove or nah? ALSO: make the transition between this smoother. if detected, then not detected, then detected (usntable detection), make sure it doesn't jump between zooms weirdly
     console.log("detected no face, iterating now: ");
   }
 
