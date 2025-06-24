@@ -137,7 +137,7 @@ videoZoom.addEventListener("loadedmetadata", async () => {
 // Recursive function to continuously track face
 let lastVideoTime = -1; // to make sure the func can start (-1 will never be equal to the video time)
 let frameCounter = 0;
-let refFace = null;
+// let refFace = null;
 
 async function predictWebcam() {
   let startTimeMs = performance.now();
