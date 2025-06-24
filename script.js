@@ -315,15 +315,22 @@ function faceFrame(face) {
 function processFrame(detections) {
   if (detections && detections.length > 0) {
     // if there is a face
-    const face = detections[0].boundingBox; // most prom face -> get box. maybe delete this and just make oldFace = face
+    const newFace = detections[0].boundingBox; // most prom face -> get box. maybe delete this and just make oldFace = face
 
     // first, odn't try every 10 frames. just see if there's a significant jump or not EVERY FRAME.
-    // if (didPositionChange(newFace, oldFace)) { // if true, track newFace
+    if (!oldFace) {
+      // at the very start, iniitalize oldface to current first frame
+      // checks if it is !null = !false = true
+      oldFace = newFace;
 
-    // } else { // track oldFace
-
-    // }
-    faceFrame(face);
+      if (didPositionChange(newFace, oldFace)) {
+        // if true, track newFace
+        faceFrame(newFace);
+      } else {
+        // track oldFace
+        faceFrame(oldFace);
+      }
+    }
     console.log("got to processing canvas");
   } else {
     zoomReset();
@@ -385,10 +392,10 @@ function zoomReset() {
 //   if (
 //     Math.abs(newFace.originX - oldFace.originX) > thresholdX ||
 //     Math.abs(newFace.originY - oldFace.originY) > thresholdY || Math.abs(1 - zoomRatio) > zoomThreshold) {
-// if zoom/position changed a lot
-// return;
+// // if zoom/position changed a lot
+// return true;
 //   } else {
-//     return; // exit
+//     return false;
 //   }
 // }
 
