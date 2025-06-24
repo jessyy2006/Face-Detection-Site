@@ -381,23 +381,25 @@ function zoomReset() {
   smoothedZoom = 1 * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
 }
 
-// // check if face position has changed enough to warrant tracking. RETURN face to track if it's new? or boolean for true, new face to track or FALSE, no new face to track keep tracking old.
-// function didPositionChange(newFace, oldFace) {
-//   const thresholdX = canvas.width * 0.05; // 5% of the width
-//   const thresholdY = canvas.height * 0.05; // 5% of the height
+// check if face position has changed enough to warrant tracking. RETURN face to track if it's new? or boolean for true, new face to track or FALSE, no new face to track keep tracking old.
+function didPositionChange(newFace, oldFace) {
+  const thresholdX = canvas.width * 0.05; // 5% of the width
+  const thresholdY = canvas.height * 0.05; // 5% of the height
 
-//   const zoomRatio = newFace.width / oldFace.width;
-//   const zoomThreshold = 0.05; // allow 5% zoom change before reacting
+  const zoomRatio = newFace.width / oldFace.width;
+  const zoomThreshold = 0.05; // allow 5% zoom change before reacting
 
-//   if (
-//     Math.abs(newFace.originX - oldFace.originX) > thresholdX ||
-//     Math.abs(newFace.originY - oldFace.originY) > thresholdY || Math.abs(1 - zoomRatio) > zoomThreshold) {
-// // if zoom/position changed a lot
-// return true;
-//   } else {
-//     return false;
-//   }
-// }
+  if (
+    Math.abs(newFace.originX - oldFace.originX) > thresholdX ||
+    Math.abs(newFace.originY - oldFace.originY) > thresholdY ||
+    Math.abs(1 - zoomRatio) > zoomThreshold
+  ) {
+    // if zoom/position changed a lot
+    return true;
+  } else {
+    return false;
+  }
+}
 
 // issues:
 // 1. doesn't stop me from going offscreen...should i do the masking thing that mathieu showed me on google meet?
