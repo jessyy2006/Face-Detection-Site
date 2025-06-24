@@ -18,7 +18,7 @@ const initializefaceDetector = async () => {
       delegate: "GPU",
     },
     runningMode: runningMode,
-    minDetectionConfidence: 0.6,
+    minDetectionConfidence: 0.5,
   });
 };
 initializefaceDetector(); // returns promises
@@ -91,7 +91,7 @@ async function enableCam(event) {
       console.error(err);
     });
 }
-// Zoom setup:
+// Zoom setup: necessary?
 function zoomSetUp() {
   if (hasZoom) {
     console.log("Browser supports zoom");
@@ -158,8 +158,6 @@ async function predictWebcam() {
     console.log("got to detections");
 
     processFrame(detections);
-
-    // frameCounter++;
   }
 
   // Call this function again to keep predicting when the browser is ready
@@ -335,7 +333,7 @@ function processFrame(detections) {
 
     console.log("got to processing canvas");
   } else {
-    zoomReset();
+    // zoomReset();
     console.log("detected no face, iterating now: ");
   }
 
@@ -373,6 +371,7 @@ function processFrame(detections) {
   );
 }
 
+// when face isn't detected, framing response:
 function zoomReset() {
   smoothedX =
     (videoFull.videoWidth / 2) * SMOOTHING_FACTOR +
@@ -405,14 +404,10 @@ function didPositionChange(newFace, oldFace) {
 }
 
 // issues:
-// 1. doesn't stop me from going offscreen...should i do the masking thing that mathieu showed me on google meet?
-// 6. when person leaves frame, camera freezes on wherever the face was last seen...like #5, figure out a way to smoothly transition back to just the full video stream w no zoom
+// 1. doesn't stop me from going offscreen...should i do the weird masking thing that you showed me on google meet where it moves the mask of your face back to center? can i even do that without a background...i guess i can.
 // 7. when another person enters frame and both faces are equally visible (one isn't very far in back), because processFrame() only creates face based on the most "prominent face", if both are oscillating between being equally as promiminent with every small movement, the camera zoom jumps around. Solve: could just remove all detections from detections array except for first one every time it detects face (every frame) so it literally can only adapt to the first person it sees...? not sure act.
 
 // mathieu's issues:
-
-// - Don't move the zoom window with each frame; wait until there is a significant difference in position for a few frames (10/20/30 frames?) before moving it.
-
 // ADDRESSED:
 // - Don't move your window “abruptly”; instead, try to do a kind of smooth tracking/zoom (smooth it out over several frames (the number of which is to be determined)
 // - Managing model errors (when your model is talking nonsense or when it doesn't detect anything at all): when the results returned by your model are too different from one frame to another, keep the current position of your zoom window.
