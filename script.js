@@ -257,7 +257,7 @@ let smoothedX = 0,
   smoothedZoom = 0,
   firstDetection = true;
 
-let frameCounter = 0;
+// let frameCounter = 0;
 let oldFace = null;
 
 // if (frameCounter % 10 === 0) {
@@ -325,8 +325,10 @@ function processFrame(detections) {
 
       if (didPositionChange(newFace, oldFace)) {
         // if true, track newFace
+        console.log("tracking new face");
         faceFrame(newFace);
       } else {
+        console.log("tracking old face");
         // track oldFace
         faceFrame(oldFace);
       }
@@ -383,6 +385,7 @@ function zoomReset() {
 
 // check if face position has changed enough to warrant tracking. RETURN face to track if it's new? or boolean for true, new face to track or FALSE, no new face to track keep tracking old.
 function didPositionChange(newFace, oldFace) {
+  console.log("inside did pos change fx");
   const thresholdX = canvas.width * 0.05; // 5% of the width
   const thresholdY = canvas.height * 0.05; // 5% of the height
 
