@@ -333,7 +333,7 @@ function processFrame(detections) {
 
     console.log("got to processing canvas");
   } else {
-    // zoomReset();
+    zoomReset();
     console.log("detected no face, iterating now: ");
   }
 
