@@ -136,8 +136,6 @@ videoZoom.addEventListener("loadedmetadata", async () => {
 
 // Recursive function to continuously track face
 let lastVideoTime = -1; // to make sure the func can start (-1 will never be equal to the video time)
-let frameCounter = 0;
-// let refFace = null;
 
 async function predictWebcam() {
   let startTimeMs = performance.now();
@@ -159,19 +157,6 @@ async function predictWebcam() {
     displayVideoDetections(detections); // calling func below using the face positions/landmarks in pixel coordinates stored in "detections" => VISUALIZES DETECTIONS. since mediapipe orders the most prominently detected face first, detections[0] is the most obvious face.
     console.log("got to detections");
 
-    // const newFace = detections[0].boundingBox;
-
-    // if (frameCounter % 10 === 0) {
-    //   // every 10 frames
-    //   if (!refFace) {
-    //     // checks if it is !null = !false = true
-    //     refFace = newFace;
-    //   }
-
-    //   // every 20 frames, including first
-    //   didPositionChange(newFace, refFace); // => then run processFrame within this func
-    //   refFace = newFace;
-    // }
     processFrame(detections);
 
     frameCounter++;
@@ -272,44 +257,74 @@ let smoothedX = 0,
   smoothedZoom = 0,
   firstDetection = true;
 
+let frameCounter = 0;
+let oldFace = null;
+
+// if (frameCounter % 10 === 0) {
+//   // every 10 frames
+//   if (!oldFace) {
+//     // checks if it is !null = !false = true
+//     oldFace = newFace;
+//   }
+
+//   // every 10 frames, including first
+//   didPositionChange(newFace, oldFace); // => then run processFrame within this func
+//   oldFace = newFace;
+// }
+
+/*
+inside process frame:
+
+1. 
+refface is what drawImage is based upon. only smooth if refface (old) differs from newface a lot.
+*/
+
+function faceFrame(face) {
+  // EMA formula: smoothedY = targetY * α + smoothedY * (1 - α)
+  let xCenter = face.originX + face.width / 2; // x center of face
+  let yCenter = face.originY + face.height / 2; // current raw value
+
+  // 1. Smooth face position (EMA)
+  smoothedX = xCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedX;
+  smoothedY = yCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedY; // use old smoothed value to get new smoothed value. this gets a "ratio" where new smoothedY is made up w a little bit of the new value and most of the old
+
+  // 2. calc zoom level
+  let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
+  let zoomScale = targetFacePixels / face.width; // how much should our face be scaled based on its current bounding box width
+
+  // edge case 1: locking zoom at 1 when face comes really close.
+  if (zoomScale >= 1) {
+    smoothedZoom =
+      zoomScale * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
+    console.log("smoothed Zoom ok: ", smoothedZoom);
+  } else {
+    zoomReset(); // reset zoom to 1
+    console.log("smoothed Zoom = 1");
+  }
+
+  // edge case 2: first detection of face = avoid blooming projection onto canvas
+  if (firstDetection) {
+    smoothedX = videoFull.videoWidth / 2;
+    smoothedY = videoFull.videoHeight / 2;
+    smoothedZoom = 1;
+    firstDetection = false;
+  }
+  console.log("got to drawing canvas with face: ", face);
+}
+
 function processFrame(detections) {
   if (detections && detections.length > 0) {
     // if there is a face
+    const face = detections[0].boundingBox; // most prom face -> get box. maybe delete this and just make oldFace = face
 
-    const face = detections[0].boundingBox; // most prom face -> get box.
+    // first, odn't try every 10 frames. just see if there's a significant jump or not EVERY FRAME.
+    // if (didPositionChange(newFace, oldFace)) { // if true, track newFace
 
+    // } else { // track oldFace
+
+    // }
+    faceFrame(face);
     console.log("got to processing canvas");
-    // EMA formula: smoothedY = targetY * α + smoothedY * (1 - α)
-
-    let xCenter = face.originX + face.width / 2; // x center of face
-    let yCenter = face.originY + face.height / 2; // current raw value
-
-    // 1. Smooth face position (EMA)
-    smoothedX = xCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedX;
-    smoothedY = yCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedY; // use old smoothed value to get new smoothed value. this gets a "ratio" where new smoothedY is made up w a little bit of the new value and most of the old
-
-    // 2. calc zoom level
-    let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
-    let zoomScale = targetFacePixels / face.width; // how much should our face be scaled based on its current bounding box width
-
-    // edge case 1: locking zoom at 1 when face comes really close.
-    if (zoomScale >= 1) {
-      smoothedZoom =
-        zoomScale * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
-      console.log("smoothed Zoom ok: ", smoothedZoom);
-    } else {
-      zoomReset(); // reset zoom to 1
-      console.log("smoothed Zoom = 1");
-    }
-
-    // edge case 2: first detection of face = avoid blooming projection onto canvas
-    if (firstDetection) {
-      smoothedX = videoFull.videoWidth / 2;
-      smoothedY = videoFull.videoHeight / 2;
-      smoothedZoom = 1;
-      firstDetection = false;
-    }
-    console.log("got to drawing canvas with face: ", face);
   } else {
     zoomReset();
     console.log("detected no face, iterating now: ");
@@ -359,22 +374,19 @@ function zoomReset() {
   smoothedZoom = 1 * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
 }
 
-// // check if face position has changed enough to warrant tracking
-// function didPositionChange(newFace, refFace) {
+// // check if face position has changed enough to warrant tracking. RETURN face to track if it's new? or boolean for true, new face to track or FALSE, no new face to track keep tracking old.
+// function didPositionChange(newFace, oldFace) {
 //   const thresholdX = canvas.width * 0.05; // 5% of the width
 //   const thresholdY = canvas.height * 0.05; // 5% of the height
 
-//   const zoomRatio = newFace.width / refFace.width;
+//   const zoomRatio = newFace.width / oldFace.width;
 //   const zoomThreshold = 0.05; // allow 5% zoom change before reacting
 
 //   if (
-//     Math.abs(newFace.originX - refFace.originX) > thresholdX ||
-//     Math.abs(newFace.originY - refFace.originY) > thresholdY
-//   ) {
-//     // if position OR distance from cam changed a lot
-//     processFrame(detections);
-//   } else if (Math.abs(1 - zoomRatio) > zoomThreshold) {
-//     processFrame(detections);
+//     Math.abs(newFace.originX - oldFace.originX) > thresholdX ||
+//     Math.abs(newFace.originY - oldFace.originY) > thresholdY || Math.abs(1 - zoomRatio) > zoomThreshold) {
+// if zoom/position changed a lot
+return;
 //   } else {
 //     return; // exit
 //   }
