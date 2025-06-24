@@ -386,7 +386,7 @@ function zoomReset() {
 //     Math.abs(newFace.originX - oldFace.originX) > thresholdX ||
 //     Math.abs(newFace.originY - oldFace.originY) > thresholdY || Math.abs(1 - zoomRatio) > zoomThreshold) {
 // if zoom/position changed a lot
-return;
+// return;
 //   } else {
 //     return; // exit
 //   }
