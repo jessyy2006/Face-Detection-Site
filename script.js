@@ -18,7 +18,7 @@ const initializefaceDetector = async () => {
       delegate: "GPU",
     },
     runningMode: runningMode,
-    minDetectionConfidence: 0.5,
+    minDetectionConfidence: 0.7,
   });
 };
 initializefaceDetector(); // returns promises
@@ -333,7 +333,7 @@ function processFrame(detections) {
 
     console.log("got to processing canvas");
   } else {
-    zoomReset();
+    zoomReset(); // remove or nah? ALSO: make the transition between this smoother. if detected, then not detected, then detected (usntable detection), make sure it doesn't jump between zooms weirdly
     console.log("detected no face, iterating now: ");
   }
 
