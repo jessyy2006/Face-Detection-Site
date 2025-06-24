@@ -316,30 +316,30 @@ function processFrame(detections) {
   if (detections && detections.length > 0) {
     // if there is a face
     const newFace = detections[0].boundingBox; // most prom face -> get box. maybe delete this and just make oldFace = face
-
+    console.log("there is a face");
     // first, odn't try every 10 frames. just see if there's a significant jump or not EVERY FRAME.
     if (!oldFace) {
-      // at the very start, iniitalize oldface to current first frame
-      // checks if it is !null = !false = true
       oldFace = newFace;
+      console.log("initially set oldface to newface");
+    } // at the very start, iniitalize oldface to current first frame
 
-      if (didPositionChange(newFace, oldFace)) {
-        // if true, track newFace
-        console.log("tracking new face");
-        faceFrame(newFace);
-      } else {
-        console.log("tracking old face");
-        // track oldFace
-        faceFrame(oldFace);
-      }
+    if (didPositionChange(newFace, oldFace)) {
+      // if true, track newFace
+      console.log("tracking new face");
+      faceFrame(newFace);
+    } else {
+      console.log("tracking old face");
+      // track oldFace
+      faceFrame(oldFace);
     }
+
     console.log("got to processing canvas");
   } else {
     zoomReset();
     console.log("detected no face, iterating now: ");
   }
 
-  // edgecase 3: avoid image stacking/black space when crop is smaller than canvas
+  // edgecase 1: avoid image stacking/black space when crop is smaller than canvas
   let cropWidth = canvas.width / smoothedZoom;
   let cropHeight = canvas.height / smoothedZoom;
   let topLeftX = smoothedX - cropWidth / 2,
