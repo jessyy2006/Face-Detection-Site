@@ -159,7 +159,7 @@ async function predictWebcam() {
 
     processFrame(detections);
 
-    frameCounter++;
+    // frameCounter++;
   }
 
   // Call this function again to keep predicting when the browser is ready
