@@ -91,14 +91,6 @@ async function enableCam(event) {
     });
 }
 
-// // check if the camera has zoom capabilities (same cam for videoZoom and videoFull so just check 1)
-// videoZoom.addEventListener("loadedmetadata", async () => {
-//   let track = videoZoom.srcObject.getVideoTracks()[0];
-//   let capabilities = track.getSettings();
-//   console.log("capabilities: ", capabilities); // no zoom, but there is resizeMode: A ConstrainDOMString object
-// });
-
-// Recursive function to continuously track face
 let lastVideoTime = -1; // to make sure the func can start (-1 will never be equal to the video time)
 /**
  * Recursive function to continuously track face
@@ -214,10 +206,9 @@ const SMOOTHING_FACTOR = 0.05; // For exponential moving average to smooth, aka 
 let smoothedX = 0,
   smoothedY = 0,
   smoothedZoom = 0,
-  firstDetection = true;
-
-let oldFace = null;
-let keepZoomReset = false;
+  firstDetection = true,
+  oldFace = null;
+keepZoomReset = false;
 
 /**
  * Processes each frame's autoframe crop box and draws it to canvas.
