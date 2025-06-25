@@ -246,37 +246,16 @@ function displayVideoDetections(detections) {
 // - Add a "padding" parameter to control how much space is around the subject.
 
 // Configuration for face tracking mechanism
-const TARGET_FACE_RATIO = 0.65; // Face height = 30% of frame height
+const TARGET_FACE_RATIO = 0.4; // Face height = 30% of frame height
 const SMOOTHING_FACTOR = 0.05; // For exponential moving average to smooth, aka how much you trust the new value
-console.log("canvas.height:", canvas.height, "canvas:", canvas);
-console.log("TARGET_FACE_RATIO:", TARGET_FACE_RATIO);
+
 // smoothing and drawing declarations
 let smoothedX = 0,
   smoothedY = 0,
   smoothedZoom = 0,
   firstDetection = true;
 
-// let frameCounter = 0;
 let oldFace = null;
-
-// if (frameCounter % 10 === 0) {
-//   // every 10 frames
-//   if (!oldFace) {
-//     // checks if it is !null = !false = true
-//     oldFace = newFace;
-//   }
-
-//   // every 10 frames, including first
-//   didPositionChange(newFace, oldFace); // => then run processFrame within this func
-//   oldFace = newFace;
-// }
-
-/*
-inside process frame:
-
-1. 
-refface is what drawImage is based upon. only smooth if refface (old) differs from newface a lot.
-*/
 
 function faceFrame(face) {
   // EMA formula: smoothedY = targetY * α + smoothedY * (1 - α)
