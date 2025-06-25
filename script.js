@@ -246,7 +246,7 @@ function displayVideoDetections(detections) {
 // - Add a "padding" parameter to control how much space is around the subject.
 
 // Configuration for face tracking mechanism
-const TARGET_FACE_RATIO = 0.3; // Face height = 30% of frame height
+const TARGET_FACE_RATIO = 0.5; // Face height = 30% of frame height
 const SMOOTHING_FACTOR = 0.05; // For exponential moving average to smooth, aka how much you trust the new value
 
 // smoothing and drawing declarations
