@@ -42,9 +42,8 @@ let enableWebcamButton; // type: HTMLButtonElement
 
 // Check if webcam access is supported.
 const hasGetUserMedia = () => !!navigator.mediaDevices?.getUserMedia; // !! converts the result to true or false
-const hasZoom = () => !!navigator.mediaDevices.getSupportedConstraints().zoom; // true or false, has zoom? maybe not necessary cuz doing digital zoom
-// Keep a reference of all the child elements we create
-// so we can remove them easily on each render.
+// const hasZoom = () => !!navigator.mediaDevices.getSupportedConstraints().zoom; // true or false, has zoom? maybe not necessary cuz doing digital zoom
+// Keep a reference of all the child elements we create on video stream so we can remove them easily on each render.
 var children = [];
 
 // If webcam supported, add event listener to button for when user
@@ -91,15 +90,15 @@ async function enableCam(event) {
       console.error(err);
     });
 }
-// Zoom setup: necessary?
-function zoomSetUp() {
-  if (hasZoom) {
-    console.log("Browser supports zoom");
-  } else {
-    alert("The browser does not support zoom.");
-  }
-}
-zoomSetUp();
+// // Zoom setup: necessary?
+// function zoomSetUp() {
+//   if (hasZoom) {
+//     console.log("Browser supports zoom");
+//   } else {
+//     alert("The browser does not support zoom.");
+//   }
+// }
+// zoomSetUp();
 
 // check if the camera has zoom capabilities (same cam for videoZoom and videoFull so just check 1)
 videoZoom.addEventListener("loadedmetadata", async () => {
@@ -108,35 +107,34 @@ videoZoom.addEventListener("loadedmetadata", async () => {
   console.log("capabilities: ", capabilities); // no zoom, but there is resizeMode: A ConstrainDOMString object
 
   // change resizeMode to scale and crop, if necessary (add if else):
-  // Try to CHANGE resizeMode (correct way)
-  try {
-    await track.applyConstraints({
-      advanced: [{ resizeMode: "crop-and-scale" }],
-    });
-    console.log("Successfully requested 'crop-and-scale'!");
-  } catch (err) {
-    console.error("Failed to set resizeMode:", err);
-  }
-  console.log("new capabilities: ", capabilities);
-  // when I use .getSettings():
-  // - aspectRatio = 1.333(4x3)
-  // - width = 640
-  // - height = 480
-  // - resizeMode rn = none, but i wanna change to 'crop-and-scale'?
+  // // Try to CHANGE resizeMode (correct way)
+  // try {
+  //   await track.applyConstraints({
+  //     advanced: [{ resizeMode: "crop-and-scale" }],
+  //   });
+  //   console.log("Successfully requested 'crop-and-scale'!");
+  // } catch (err) {
+  //   console.error("Failed to set resizeMode:", err);
+  // }
+  // console.log("new capabilities: ", capabilities);
+  // // when I use .getSettings():
+  // // - aspectRatio = 1.333(4x3)
+  // // - width = 640
+  // // - height = 480
+  // // - resizeMode rn = none, but i wanna change to 'crop-and-scale'?
 
-  //   if ("zoom" in capabilities) {
-  //     let min = capabilities["zoom"]["min"]; // get the min and max zoom values embedded in cam
-  //     let max = capabilities["zoom"]["max"];
-  //     console.log("min: " + min);
-  //     console.log("max: " + max);
-  //   } else {
-  //     alert("This camera does not support zoom");
-  //   }
+  // //   if ("zoom" in capabilities) {
+  // //     let min = capabilities["zoom"]["min"]; // get the min and max zoom values embedded in cam
+  // //     let max = capabilities["zoom"]["max"];
+  // //     console.log("min: " + min);
+  // //     console.log("max: " + max);
+  // //   } else {
+  // //     alert("This camera does not support zoom");
+  // //   }
 });
 
 // Recursive function to continuously track face
 let lastVideoTime = -1; // to make sure the func can start (-1 will never be equal to the video time)
-
 async function predictWebcam() {
   let startTimeMs = performance.now();
   // Detect faces using detectForVideo
@@ -242,8 +240,6 @@ function displayVideoDetections(detections) {
 /*************************************************/
 // FACE TRACKING + ZOOM
 /*************************************************/
-// TO-DOs:
-// - Add a "padding" parameter to control how much space is around the subject.
 
 // Configuration for face tracking mechanism
 const TARGET_FACE_RATIO = 0.4; // Face height = 30% of frame height
@@ -367,7 +363,7 @@ function zoomReset() {
   smoothedZoom = 1 * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
 }
 
-// check if face position has changed enough to warrant tracking. RETURN face to track if it's new? or boolean for true, new face to track or FALSE, no new face to track keep tracking old.
+// check if face position has changed enough to warrant tracking. RETURN boolean for true, new face to track or FALSE, no new face to track keep tracking old.
 function didPositionChange(newFace, oldFace) {
   console.log("inside did pos change fx");
   const thresholdX = canvas.width * 0.07; // 7% of the width
@@ -392,8 +388,3 @@ function didPositionChange(newFace, oldFace) {
 // 1. when move significantly, there may be 2+ newFaces in that one movements so it kinda jumps to one newFace (in middle of movement) then jumps to final newFace (at the end of the movement). this makes it kinda jumpy.
 // 2. doesn't stop me from going offscreen...should i do the weird masking thing that you showed me on google meet where it moves the mask of your face back to center? can i even do that without a background...i guess i can.
 // 7. when another person enters frame and both faces are equally visible (one isn't very far in back), because processFrame() only creates face based on the most "prominent face", if both are oscillating between being equally as promiminent with every small movement, the camera zoom jumps around. Solve: could just remove all detections from detections array except for first one every time it detects face (every frame) so it literally can only adapt to the first person it sees...? not sure act.
-
-// mathieu's issues:
-// ADDRESSED:
-// - Don't move your window “abruptly”; instead, try to do a kind of smooth tracking/zoom (smooth it out over several frames (the number of which is to be determined)
-// - Managing model errors (when your model is talking nonsense or when it doesn't detect anything at all): when the results returned by your model are too different from one frame to another, keep the current position of your zoom window.
