@@ -256,6 +256,7 @@ let smoothedX = 0,
   firstDetection = true;
 
 let oldFace = null;
+let zoomReset = false;
 
 function faceFrame(face) {
   // EMA formula: smoothedY = targetY * α + smoothedY * (1 - α)
@@ -315,7 +316,7 @@ function processFrame(detections) {
 
     // console.log("got to processing canvas");
   } else {
-    // zoomReset(); // remove or nah? ALSO: make the transition between this smoother. if detected, then not detected, then detected (usntable detection), make sure it doesn't jump between zooms weirdly
+    if (zoomReset) zoomReset(); // ALSO: make the transition between this smoother. if detected, then not detected, then detected (usntable detection), make sure it doesn't jump between zooms weirdly
     console.log("detected no face, iterating now: ");
   }
 
@@ -378,17 +379,16 @@ function didPositionChange(newFace, oldFace) {
     Math.abs(newFace.originY - oldFace.originY) > thresholdY ||
     Math.abs(1 - zoomRatio) > zoomThreshold
   ) {
-    // if zoom/position changed a lot
-    console.log("true");
+    // if zoom/position changed a lot.
     return true;
   } else {
-    console.log("false");
     return false;
   }
 }
 
 // issues:
-// 1. doesn't stop me from going offscreen...should i do the weird masking thing that you showed me on google meet where it moves the mask of your face back to center? can i even do that without a background...i guess i can.
+// 1. when move significantly, there may be 2+ newFaces in that one movements so it kinda jumps to one newFace (in middle of movement) then jumps to final newFace (at the end of the movement). this makes it kinda jumpy.
+// 2. doesn't stop me from going offscreen...should i do the weird masking thing that you showed me on google meet where it moves the mask of your face back to center? can i even do that without a background...i guess i can.
 // 7. when another person enters frame and both faces are equally visible (one isn't very far in back), because processFrame() only creates face based on the most "prominent face", if both are oscillating between being equally as promiminent with every small movement, the camera zoom jumps around. Solve: could just remove all detections from detections array except for first one every time it detects face (every frame) so it literally can only adapt to the first person it sees...? not sure act.
 
 // mathieu's issues:
