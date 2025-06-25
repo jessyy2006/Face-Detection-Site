@@ -5,7 +5,7 @@ import {
 
 let faceDetector; // type: FaceDetector
 let runningMode = "VIDEO";
-3;
+
 // Initialize the object detector
 const initializefaceDetector = async () => {
   const vision = await FilesetResolver.forVisionTasks(
@@ -35,19 +35,16 @@ const ctx = canvas.getContext("2d");
 canvas.width = 640;
 canvas.height = 480;
 
-// video
+// video setup
 const liveFullView = document.getElementById("liveFullView"); // can't change constant vars
 const liveMaskView = document.getElementById("liveMaskView"); // div holding the video screen and face detection graphics.
 let enableWebcamButton; // type: HTMLButtonElement
+let children = []; // Keep a reference of all the child elements we create on video stream so we can remove them easily on each render.
 
 // Check if webcam access is supported.
 const hasGetUserMedia = () => !!navigator.mediaDevices?.getUserMedia; // !! converts the result to true or false
 
-// Keep a reference of all the child elements we create on video stream so we can remove them easily on each render.
-var children = [];
-
-// If webcam supported, add event listener to button for when user
-// wants to activate it.
+// If webcam supported, add event listener to button for when user wants to activate it.
 if (hasGetUserMedia()) {
   enableWebcamButton = document.getElementById("webcamButton");
   enableWebcamButton.addEventListener("click", enableCam); // When someone clicks this button, run the enableCam function
@@ -55,7 +52,10 @@ if (hasGetUserMedia()) {
   console.warn("getUserMedia() is not supported by your browser");
 }
 
-// Enable the live webcam view and start detection.
+/**
+ * Enable live webcam view and start detection.
+ * @param {event} event - event = click.
+ */
 async function enableCam(event) {
   if (!faceDetector) {
     alert("Face Detector is still loading. Please try again..");
@@ -91,15 +91,18 @@ async function enableCam(event) {
     });
 }
 
-// check if the camera has zoom capabilities (same cam for videoZoom and videoFull so just check 1)
-videoZoom.addEventListener("loadedmetadata", async () => {
-  let track = videoZoom.srcObject.getVideoTracks()[0];
-  let capabilities = track.getSettings();
-  console.log("capabilities: ", capabilities); // no zoom, but there is resizeMode: A ConstrainDOMString object
-});
+// // check if the camera has zoom capabilities (same cam for videoZoom and videoFull so just check 1)
+// videoZoom.addEventListener("loadedmetadata", async () => {
+//   let track = videoZoom.srcObject.getVideoTracks()[0];
+//   let capabilities = track.getSettings();
+//   console.log("capabilities: ", capabilities); // no zoom, but there is resizeMode: A ConstrainDOMString object
+// });
 
 // Recursive function to continuously track face
 let lastVideoTime = -1; // to make sure the func can start (-1 will never be equal to the video time)
+/**
+ * Recursive function to continuously track face
+ */
 async function predictWebcam() {
   let startTimeMs = performance.now();
   // Detect faces using detectForVideo
@@ -126,11 +129,11 @@ async function predictWebcam() {
   // Call this function again to keep predicting when the browser is ready
   window.requestAnimationFrame(predictWebcam);
 }
-
-// VISUALIZES DETECTIONS for each frame. this code is still for detecting multiple people.
+/**
+ * VISUALIZES DETECTIONS for each frame on video element. Detects multiple people.
+ * @param {detections[]} detections - array of detection objects (detected faces), from most high confidence to least.
+ */
 function displayVideoDetections(detections) {
-  // detections is an array of Detection[]
-
   // Remove any highlighting from previous frame (constantly updating each frame).
   for (let child of children) {
     liveFullView.removeChild(child);
@@ -146,9 +149,6 @@ function displayVideoDetections(detections) {
       Math.round(parseFloat(detection.categories[0].score) * 100) +
       "%"; // gets score as float, turns into percent, rounds to whole number
 
-    // video.offsetWidth = pixel width of the video element
-    // detection.boundingBox.width = width of box
-    // detection.boundingBox.originX = start of the horizontal placement of box (upper left corner)
     p.style = // style position of the percent
       "left: " +
       (videoFull.offsetWidth -
@@ -219,6 +219,76 @@ let smoothedX = 0,
 let oldFace = null;
 let keepZoomReset = false;
 
+/**
+ * Processes each frame's autoframe crop box and draws it to canvas.
+ * @param {detections[]} detections - array of detection objects (detected faces), from most high confidence to least.
+ */
+function processFrame(detections) {
+  if (detections && detections.length > 0) {
+    // if there is a face
+    const newFace = detections[0].boundingBox; // most prom face -> get box. maybe delete this and just make oldFace = face
+    console.log("there is a face");
+
+    // 1. initialize oldFace to first EVER face to set anchor to track rest of face movements
+    if (!oldFace) {
+      console.log("initially set oldface to newface");
+    }
+
+    // 2. has there been a significant jump or not?
+    if (didPositionChange(newFace, oldFace)) {
+      // if true, track newFace
+      console.log("tracking new face");
+      faceFrame(newFace);
+      oldFace = newFace; // if face moved a lot, now new pos = "old" pos as the reference.
+    } else {
+      console.log("tracking old face");
+      // track oldFace
+      faceFrame(oldFace);
+    }
+    // console.log("got to processing canvas");
+  } else {
+    if (keepZoomReset) {
+      // if user wants camera to zoom out if no face detected
+      zoomReset();
+    } // ALSO: make the transition between this smoother. if detected, then not detected, then detected (usntable detection), make sure it doesn't jump between zooms weirdly
+    console.log("detected no face, iterating now: ");
+  }
+
+  // Edgecase 1: avoid image stacking/black space when crop is smaller than canvas
+  let cropWidth = canvas.width / smoothedZoom;
+  let cropHeight = canvas.height / smoothedZoom;
+  let topLeftX = smoothedX - cropWidth / 2,
+    topLeftY = smoothedY - cropHeight / 2;
+
+  topLeftX = Math.max(0, Math.min(topLeftX, videoFull.videoWidth - cropWidth));
+  topLeftY = Math.max(
+    0,
+    Math.min(topLeftY, videoFull.videoHeight - cropHeight)
+  );
+
+  ctx.drawImage(
+    videoFull, // source video
+
+    // cropped from source
+    topLeftX, // top left corner of crop in og vid. no mirroring in this math because want to cam to center person, not just track.
+    topLeftY,
+    cropWidth, // how wide a piece we're cropping from original vid
+    cropHeight, // how tall
+
+    // destination
+    0, // x coord for where on canvas to start drawing (left->right)
+    0, // y coord
+    canvas.width, // since canvas width/height is hardcoded to my video resolution, this maintains aspect ratio. should change this to update to whatever cam resolution rainbow uses.
+    canvas.height
+  );
+}
+/******************************************************************** */
+// FUNCTIONS USED IN processFrame():
+/******************************************************************** */
+/**
+ * Sets up smoothed bounding parameters to autoframe face
+ * @param {detection.boundingBox} face - bounding box of tracked face
+ */
 function faceFrame(face) {
   // EMA formula: smoothedY = targetY * α + smoothedY * (1 - α)
   let xCenter = face.originX + face.width / 2; // x center of face
@@ -232,8 +302,7 @@ function faceFrame(face) {
   let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
   let zoomScale = targetFacePixels / face.width; // how much should our face be scaled based on its current bounding box width
 
-  // old face isn't being updated
-  // edge case 1: locking zoom at 1 when face comes really close.
+  // Edge case 1: locking zoom at 1 when face comes really close.
   if (zoomScale >= 1) {
     smoothedZoom =
       zoomScale * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
@@ -243,7 +312,7 @@ function faceFrame(face) {
     console.log("smoothed Zoom = 1");
   }
 
-  // edge case 2: first detection of face = avoid blooming projection onto canvas
+  // Edge case 2: first detection of face = avoid blooming projection onto canvas
   if (firstDetection) {
     smoothedX = videoFull.videoWidth / 2;
     smoothedY = videoFull.videoHeight / 2;
@@ -253,71 +322,9 @@ function faceFrame(face) {
   // console.log("got to drawing canvas with face: ", face);
 }
 
-function processFrame(detections) {
-  if (detections && detections.length > 0) {
-    // if there is a face
-    const newFace = detections[0].boundingBox; // most prom face -> get box. maybe delete this and just make oldFace = face
-    console.log("there is a face");
-    // first, see if there's a significant jump or not EVERY FRAME.
-    if (!oldFace) {
-      oldFace = newFace;
-      console.log("initially set oldface to newface");
-    } // at the very start, initalize oldface to current first frame
-
-    if (didPositionChange(newFace, oldFace)) {
-      // if true, track newFace
-      console.log("tracking new face");
-      faceFrame(newFace);
-      oldFace = newFace; // if face moved a lot, now new pos = "old" pos as the reference.
-    } else {
-      console.log("tracking old face");
-      // track oldFace
-      faceFrame(oldFace);
-    }
-
-    // console.log("got to processing canvas");
-  } else {
-    if (keepZoomReset) {
-      zoomReset();
-    } // ALSO: make the transition between this smoother. if detected, then not detected, then detected (usntable detection), make sure it doesn't jump between zooms weirdly
-    console.log("detected no face, iterating now: ");
-  }
-
-  // edgecase 1: avoid image stacking/black space when crop is smaller than canvas
-  let cropWidth = canvas.width / smoothedZoom;
-  let cropHeight = canvas.height / smoothedZoom;
-  let topLeftX = smoothedX - cropWidth / 2,
-    topLeftY = smoothedY - cropHeight / 2;
-
-  topLeftX = Math.max(0, Math.min(topLeftX, videoFull.videoWidth - cropWidth));
-  topLeftY = Math.max(
-    0,
-    Math.min(topLeftY, videoFull.videoHeight - cropHeight)
-  );
-
-  // console.log(
-  //   `crop width = ${cropWidth}, cropHeight = ${cropHeight}, topleftX = ${topLeftX},topleftY = ${topLeftY}, videowidth = ${videoFull.width}, videoVIDEOwidth = ${videoFull.videoWidth}`
-  // );
-
-  ctx.drawImage(
-    // source video
-    videoFull,
-
-    // cropped from source
-    topLeftX, // top left corner of crop in og vid. no mirroring in this math because want to cam to center person, not just track.
-    topLeftY,
-    cropWidth, // how wide a piece we're cropping from original vid
-    cropHeight, // how tall
-
-    // destination
-    0, // x coord for where on canvas to start drawing (left->right)
-    0,
-    canvas.width, // since canvas width/height is hardcoded to my video resolution, this maintains aspect ratio. should change this to update to whatever cam resolution rainbow uses.
-    canvas.height
-  );
-}
-
-// when face isn't detected, framing response:
+/**
+ * When face isn't detected, optional framing reset to default stream determined by keepZoomReset boolean.
+ */
 function zoomReset() {
   smoothedX =
     (videoFull.videoWidth / 2) * SMOOTHING_FACTOR +
@@ -327,8 +334,12 @@ function zoomReset() {
     (1 - SMOOTHING_FACTOR) * smoothedY;
   smoothedZoom = 1 * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
 }
-
-// check if face position has changed enough to warrant tracking. RETURN boolean for true, new face to track or FALSE, no new face to track keep tracking old.
+/**
+ * Every frame, check if face position has changed enough to warrant tracking.
+ * @param {detection.boundingBox} newFace - current frame's face bounding box
+ * @param {detection.boundingBox} oldFace - most recent "still" frame's face bounding box (anchor)
+ * @return {boolean} true = track new, false = track old
+ */
 function didPositionChange(newFace, oldFace) {
   console.log("inside did pos change fx");
   const thresholdX = canvas.width * 0.07; // 7% of the width
@@ -338,11 +349,11 @@ function didPositionChange(newFace, oldFace) {
   const zoomThreshold = 0.1; // allow 10% zoom change before reacting
 
   if (
+    // if zoom/position changed a lot.
     Math.abs(newFace.originX - oldFace.originX) > thresholdX ||
     Math.abs(newFace.originY - oldFace.originY) > thresholdY ||
     Math.abs(1 - zoomRatio) > zoomThreshold
   ) {
-    // if zoom/position changed a lot.
     return true;
   } else {
     return false;
