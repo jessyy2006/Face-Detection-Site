@@ -231,6 +231,7 @@ function processFrame(detections) {
 
     // 1. initialize oldFace to first EVER face to set anchor to track rest of face movements
     if (!oldFace) {
+      oldFace = newFace;
       console.log("initially set oldface to newface");
     }
 
