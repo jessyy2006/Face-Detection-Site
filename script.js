@@ -323,7 +323,7 @@ function processFrame(detections) {
   let cropWidth = canvas.width / smoothedZoom;
   let cropHeight = canvas.height / smoothedZoom;
   let topLeftX = smoothedX - cropWidth / 2,
-    topLeftY = smoothedY - cropHeight / 2;
+    topLeftY = smoothedY - cropHeight / 2 - 40;
 
   topLeftX = Math.max(0, Math.min(topLeftX, videoFull.videoWidth - cropWidth));
   topLeftY = Math.max(
