@@ -207,8 +207,8 @@ let smoothedX = 0,
   smoothedY = 0,
   smoothedZoom = 0,
   firstDetection = true,
-  oldFace = null;
-keepZoomReset = false;
+  oldFace = null,
+  keepZoomReset = false;
 
 /**
  * Processes each frame's autoframe crop box and draws it to canvas.
