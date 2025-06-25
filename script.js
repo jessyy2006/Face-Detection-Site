@@ -246,7 +246,7 @@ function displayVideoDetections(detections) {
 // - Add a "padding" parameter to control how much space is around the subject.
 
 // Configuration for face tracking mechanism
-const TARGET_FACE_RATIO = 0.5; // Face height = 30% of frame height
+const TARGET_FACE_RATIO = 0.65; // Face height = 30% of frame height
 const SMOOTHING_FACTOR = 0.05; // For exponential moving average to smooth, aka how much you trust the new value
 
 // smoothing and drawing declarations
@@ -315,11 +315,11 @@ function processFrame(detections) {
     // if there is a face
     const newFace = detections[0].boundingBox; // most prom face -> get box. maybe delete this and just make oldFace = face
     console.log("there is a face");
-    // first, odn't try every 10 frames. just see if there's a significant jump or not EVERY FRAME.
+    // first, see if there's a significant jump or not EVERY FRAME.
     if (!oldFace) {
       oldFace = newFace;
       console.log("initially set oldface to newface");
-    } // at the very start, iniitalize oldface to current first frame
+    } // at the very start, initalize oldface to current first frame
 
     if (didPositionChange(newFace, oldFace)) {
       // if true, track newFace
