@@ -289,7 +289,8 @@ function faceFrame(face) {
   // 2. calc zoom level
   let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
   let zoomScale = targetFacePixels / face.width; // how much should our face be scaled based on its current bounding box width
-
+  console.log("targetFacePixels:", targetFacePixels);
+  console.log("TARGET_FACE_RATIO: ", TARGET_FACE_RATIO);
   // edge case 1: locking zoom at 1 when face comes really close.
   if (zoomScale >= 1) {
     smoothedZoom =
