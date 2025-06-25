@@ -367,8 +367,8 @@ function zoomReset() {
 // check if face position has changed enough to warrant tracking. RETURN face to track if it's new? or boolean for true, new face to track or FALSE, no new face to track keep tracking old.
 function didPositionChange(newFace, oldFace) {
   console.log("inside did pos change fx");
-  const thresholdX = videoFull.videoWidth * 0.07; // 7% of the width
-  const thresholdY = videoFull.videoHeight * 0.07; // 7% of the height
+  const thresholdX = canvas.width * 0.07; // 7% of the width
+  const thresholdY = canvas.height * 0.07; // 7% of the height
 
   const zoomRatio = newFace.width / oldFace.width;
   const zoomThreshold = 0.1; // allow 10% zoom change before reacting
