@@ -248,7 +248,8 @@ function displayVideoDetections(detections) {
 // Configuration for face tracking mechanism
 const TARGET_FACE_RATIO = 0.65; // Face height = 30% of frame height
 const SMOOTHING_FACTOR = 0.05; // For exponential moving average to smooth, aka how much you trust the new value
-
+console.log("canvas.height:", canvas.height, "canvas:", canvas);
+console.log("TARGET_FACE_RATIO:", TARGET_FACE_RATIO);
 // smoothing and drawing declarations
 let smoothedX = 0,
   smoothedY = 0,
@@ -287,18 +288,10 @@ function faceFrame(face) {
   smoothedY = yCenter * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedY; // use old smoothed value to get new smoothed value. this gets a "ratio" where new smoothedY is made up w a little bit of the new value and most of the old
 
   // 2. calc zoom level
-  console.log("inside faceFrame()");
-  console.log("canvas.height:", canvas.height, "canvas:", canvas);
   let targetFacePixels = TARGET_FACE_RATIO * canvas.height; // % of the canvas u wanna take up * height of canvas
   let zoomScale = targetFacePixels / face.width; // how much should our face be scaled based on its current bounding box width
-  console.log("targetFacePixels:", targetFacePixels, "at", performance.now());
-  console.log(
-    "TARGET_FACE_RATIO: ",
-    TARGET_FACE_RATIO,
-    "at",
-    performance.now()
-  );
 
+  // old face isn't being updated
   // edge case 1: locking zoom at 1 when face comes really close.
   if (zoomScale >= 1) {
     smoothedZoom =
@@ -316,7 +309,7 @@ function faceFrame(face) {
     smoothedZoom = 1;
     firstDetection = false;
   }
-  console.log("got to drawing canvas with face: ", face);
+  // console.log("got to drawing canvas with face: ", face);
 }
 
 function processFrame(detections) {
@@ -334,13 +327,14 @@ function processFrame(detections) {
       // if true, track newFace
       console.log("tracking new face");
       faceFrame(newFace);
+      oldFace = newFace; // if face moved a lot, now new pos = "old" pos as the reference.
     } else {
       console.log("tracking old face");
       // track oldFace
       faceFrame(oldFace);
     }
 
-    console.log("got to processing canvas");
+    // console.log("got to processing canvas");
   } else {
     // zoomReset(); // remove or nah? ALSO: make the transition between this smoother. if detected, then not detected, then detected (usntable detection), make sure it doesn't jump between zooms weirdly
     console.log("detected no face, iterating now: ");
@@ -358,9 +352,9 @@ function processFrame(detections) {
     Math.min(topLeftY, videoFull.videoHeight - cropHeight)
   );
 
-  console.log(
-    `crop width = ${cropWidth}, cropHeight = ${cropHeight}, topleftX = ${topLeftX},topleftY = ${topLeftY}, videowidth = ${videoFull.width}, videoVIDEOwidth = ${videoFull.videoWidth}`
-  );
+  // console.log(
+  //   `crop width = ${cropWidth}, cropHeight = ${cropHeight}, topleftX = ${topLeftX},topleftY = ${topLeftY}, videowidth = ${videoFull.width}, videoVIDEOwidth = ${videoFull.videoWidth}`
+  // );
 
   ctx.drawImage(
     // source video
@@ -406,8 +400,10 @@ function didPositionChange(newFace, oldFace) {
     Math.abs(1 - zoomRatio) > zoomThreshold
   ) {
     // if zoom/position changed a lot
+    console.log("true");
     return true;
   } else {
+    console.log("false");
     return false;
   }
 }
