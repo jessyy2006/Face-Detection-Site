@@ -256,7 +256,7 @@ let smoothedX = 0,
   firstDetection = true;
 
 let oldFace = null;
-let zoomReset = false;
+let keepZoomReset = false;
 
 function faceFrame(face) {
   // EMA formula: smoothedY = targetY * α + smoothedY * (1 - α)
@@ -316,7 +316,7 @@ function processFrame(detections) {
 
     // console.log("got to processing canvas");
   } else {
-    if (zoomReset) {
+    if (keepZoomReset) {
       zoomReset();
     } // ALSO: make the transition between this smoother. if detected, then not detected, then detected (usntable detection), make sure it doesn't jump between zooms weirdly
     console.log("detected no face, iterating now: ");
