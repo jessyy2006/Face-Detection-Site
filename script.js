@@ -7,9 +7,9 @@ import {
 let CONFIG = {}; // object to hold config
 let faceDetector; // type: FaceDetector
 // let runningMode = "VIDEO"; // update these based on config
-const TARGET_FACE_RATIO = 0;
-const SMOOTHING_FACTOR = 0;
-const keepZoomReset = 0;
+let TARGET_FACE_RATIO = 0;
+let SMOOTHING_FACTOR = 0;
+let keepZoomReset = 0;
 
 async function loadConfig() {
   try {
