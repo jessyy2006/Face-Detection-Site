@@ -3,6 +3,7 @@ import {
   FilesetResolver,
 } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
 
+// Global variables
 let CONFIG = {}; // object to hold config
 let faceDetector; // type: FaceDetector
 // let runningMode = "VIDEO"; // update these based on config
@@ -62,8 +63,8 @@ let videoZoom = document.getElementById("webcamMask"); // empty frame for masked
 // canvas setup
 const canvas = document.getElementById("framedOutput");
 const ctx = canvas.getContext("2d");
-canvas.width = CONFIG.canvas.width; // ;
-canvas.height = CONFIG.canvas.height; // 480;
+// canvas.width = CONFIG.canvas.width; // ;
+// canvas.height = CONFIG.canvas.height; // 480;
 
 // video setup
 const liveFullView = document.getElementById("liveFullView"); // can't change constant vars
@@ -413,3 +414,4 @@ async function main() {
     console.warn("getUserMedia() is not supported by your browser");
   }
 }
+main();
