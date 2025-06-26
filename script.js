@@ -3,26 +3,38 @@ import {
   FilesetResolver,
 } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
 
+import { CONFIG } from "./config.js";
+
 let faceDetector; // type: FaceDetector
-let runningMode = "VIDEO";
+// let runningMode = "VIDEO"; // update these based on config
 
 // Initialize the object detector
 const initializefaceDetector = async () => {
-  const vision = await FilesetResolver.forVisionTasks(
-    // use await to pause the async func and temporarily return to main thread until promise resolves: force js to finish this statement first before moving onto the second, as the second is dependent on the first. however, browser can still load animations, etc during this time
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
-  );
+  const vision = await FilesetResolver.forVisionTasks;
+  // use await to pause the async func and temporarily return to main thread until promise resolves: force js to finish this statement first before moving onto the second, as the second is dependent on the first. however, browser can still load animations, etc during this time
+  CONFIG.mediapipe
+    .visionTasksWasm // "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm" // location of the WebAssembly (WASM) files and other essential assets that the Mediapipe FilesetResolver needs to load to function correctly.
+    ();
   faceDetector = await FaceDetector.createFromOptions(vision, {
     baseOptions: {
-      modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite`, // ML model that detects faces at close range (path to the specific model)
-      delegate: "GPU",
+      modelAssetPath: CONFIG.mediapipe.faceDetector.modelAssetPath, // `https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/ blaze_face_short_range.tflite`, // ML model that detects faces at close range (path to the specific model) // update these based on config
+      delegate: CONFIG.mediapipe.faceDetector.delegate, // "GPU", // update these based on config
     },
-    runningMode: runningMode,
-    minDetectionConfidence: 0.7,
+    runningMode: CONFIG.mediapipe.faceDetector.runningMode, // runningMode, update these based on config
+    minDetectionConfidence:
+      CONFIG.mediapipe.faceDetector.minDetectionConfidence, // 0.7, update these based on config
   });
 };
 initializefaceDetector(); // returns promises
+/* 
+,
 
+  "canvas": {
+    "width": ,
+    "height": ,
+    "outputResolution": ,
+    "frameRate": 
+  }*/
 /*************************************************/
 // CONTINUOUS FACE DETECTION
 /*************************************************/
@@ -85,6 +97,16 @@ async function enableCam(event) {
         predictWebcam();
       }); // When the video finishes loading and is ready to play, run the predictWebcam function.
       videoZoom.addEventListener("loadeddata", predictWebcam);
+
+      const videoTrack = stream.getVideoTracks()[0];
+      const settings = videoTrack.getSettings();
+
+      // Store live settings in config so canvas size = video size
+      CONFIG.canvas.width = settings.width;
+      CONFIG.canvas.height = settings.height;
+      CONFIG.frameRate = settings.frameRate;
+
+      console.log("Live config:", CONFIG);
     })
     .catch((err) => {
       console.error(err);
@@ -198,17 +220,17 @@ function displayVideoDetections(detections) {
 // FACE TRACKING + ZOOM
 /*************************************************/
 
-// Configuration for face tracking mechanism
-const TARGET_FACE_RATIO = 0.4; // Face height = 30% of frame height
-const SMOOTHING_FACTOR = 0.05; // For exponential moving average to smooth, aka how much you trust the new value
+// // Configuration for face tracking mechanism
+const TARGET_FACE_RATIO = CONFIG.framing.TARGET_FACE_RATIO; // 0.4; // Face height = 30% of frame height // update these based on config
+const SMOOTHING_FACTOR = CONFIG.framing.SMOOTHING_FACTOR; // 0.05; // For exponential moving average to smooth, aka how much you trust the new value // update these based on config
+const keepZoomReset = CONFIG.framing.keepZoomReset; // update
 
 // smoothing and drawing declarations
 let smoothedX = 0,
   smoothedY = 0,
   smoothedZoom = 0,
   firstDetection = true,
-  oldFace = null,
-  keepZoomReset = false;
+  oldFace = null;
 
 /**
  * Processes each frame's autoframe crop box and draws it to canvas.
