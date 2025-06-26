@@ -3,10 +3,34 @@ import {
   FilesetResolver,
 } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
 
-import { CONFIG } from "./config.json";
-
+let CONFIG = {}; // object to hold config
 let faceDetector; // type: FaceDetector
 // let runningMode = "VIDEO"; // update these based on config
+
+async function loadConfig() {
+  try {
+    // 1. Use fetch to get the JSON file
+    const response = await fetch("./config.json");
+
+    // 2. Check if the network request was successful
+    if (!response.ok) {
+      // if not ok
+      throw new Error(
+        `HTTP error! status: ${response.status} while fetching config.json`
+      );
+    }
+
+    // 3. json() parses the JSON response into a JavaScript object
+    CONFIG = await response.json();
+
+    console.log("Config loaded successfully:", CONFIG);
+    console.log("API Base URL:", CONFIG.apiBaseUrl);
+  } catch (error) {
+    console.error("Error loading or parsing config.json:", error);
+    // might want to initialize with default settings if the config fails to load (should i?)
+  }
+}
+loadConfig();
 
 // Initialize the object detector
 const initializefaceDetector = async () => {
