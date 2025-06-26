@@ -63,7 +63,7 @@ let videoZoom = document.getElementById("webcamMask"); // empty frame for masked
 // canvas setup
 const canvas = document.getElementById("framedOutput");
 const ctx = canvas.getContext("2d");
-// canvas.width = CONFIG.canvas.width; // ;
+// canvas.width = CONFIG.canvas.width; // 640;
 // canvas.height = CONFIG.canvas.height; // 480;
 
 // video setup
@@ -124,6 +124,9 @@ async function enableCam(event) {
       CONFIG.canvas.width = settings.width;
       CONFIG.canvas.height = settings.height;
       CONFIG.frameRate = settings.frameRate;
+
+      canvas.width = CONFIG.canvas.width; // 640;
+      canvas.height = CONFIG.canvas.height; // 480;
 
       console.log("Live config:", CONFIG);
     })
