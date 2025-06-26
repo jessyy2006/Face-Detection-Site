@@ -6,6 +6,9 @@ import {
 let CONFIG = {}; // object to hold config
 let faceDetector; // type: FaceDetector
 // let runningMode = "VIDEO"; // update these based on config
+const TARGET_FACE_RATIO = 0;
+const SMOOTHING_FACTOR = 0;
+const keepZoomReset = 0;
 
 async function loadConfig() {
   try {
@@ -30,15 +33,14 @@ async function loadConfig() {
     // might want to initialize with default settings if the config fails to load (should i?)
   }
 }
-loadConfig();
 
 // Initialize the object detector
 const initializefaceDetector = async () => {
-  const vision = await FilesetResolver.forVisionTasks;
-  // use await to pause the async func and temporarily return to main thread until promise resolves: force js to finish this statement first before moving onto the second, as the second is dependent on the first. however, browser can still load animations, etc during this time
-  CONFIG.mediapipe
-    .visionTasksWasm // "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm" // location of the WebAssembly (WASM) files and other essential assets that the Mediapipe FilesetResolver needs to load to function correctly.
-    ();
+  const vision = await FilesetResolver.forVisionTasks(
+    // use await to pause the async func and temporarily return to main thread until promise resolves: force js to finish this statement first before moving onto the second, as the second is dependent on the first. however, browser can still load animations, etc during this time
+    CONFIG.mediapipe.visionTasksWasm
+  ); // "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm" // location of the WebAssembly (WASM) files and other essential assets that the Mediapipe FilesetResolver needs to load to function correctly.
+
   faceDetector = await FaceDetector.createFromOptions(vision, {
     baseOptions: {
       modelAssetPath: CONFIG.mediapipe.faceDetector.modelAssetPath, // `https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/ blaze_face_short_range.tflite`, // ML model that detects faces at close range (path to the specific model) // update these based on config
@@ -49,16 +51,8 @@ const initializefaceDetector = async () => {
       CONFIG.mediapipe.faceDetector.minDetectionConfidence, // 0.7, update these based on config
   });
 };
-initializefaceDetector(); // returns promises
-/* 
-,
+// initializefaceDetector(); // returns promises
 
-  "canvas": {
-    "width": ,
-    "height": ,
-    "outputResolution": ,
-    "frameRate": 
-  }*/
 /*************************************************/
 // CONTINUOUS FACE DETECTION
 /*************************************************/
@@ -68,8 +62,8 @@ let videoZoom = document.getElementById("webcamMask"); // empty frame for masked
 // canvas setup
 const canvas = document.getElementById("framedOutput");
 const ctx = canvas.getContext("2d");
-canvas.width = 640;
-canvas.height = 480;
+canvas.width = CONFIG.canvas.width; // ;
+canvas.height = CONFIG.canvas.height; // 480;
 
 // video setup
 const liveFullView = document.getElementById("liveFullView"); // can't change constant vars
@@ -81,12 +75,12 @@ let children = []; // Keep a reference of all the child elements we create on vi
 const hasGetUserMedia = () => !!navigator.mediaDevices?.getUserMedia; // !! converts the result to true or false
 
 // If webcam supported, add event listener to button for when user wants to activate it.
-if (hasGetUserMedia()) {
-  enableWebcamButton = document.getElementById("webcamButton");
-  enableWebcamButton.addEventListener("click", enableCam); // When someone clicks this button, run the enableCam function
-} else {
-  console.warn("getUserMedia() is not supported by your browser");
-}
+// if (hasGetUserMedia()) {
+//   enableWebcamButton = document.getElementById("webcamButton");
+//   enableWebcamButton.addEventListener("click", enableCam); // When someone clicks this button, run the enableCam function
+// } else {
+//   console.warn("getUserMedia() is not supported by your browser");
+// }
 
 /**
  * Enable live webcam view and start detection.
@@ -245,9 +239,9 @@ function displayVideoDetections(detections) {
 /*************************************************/
 
 // // Configuration for face tracking mechanism
-const TARGET_FACE_RATIO = CONFIG.framing.TARGET_FACE_RATIO; // 0.4; // Face height = 30% of frame height // update these based on config
-const SMOOTHING_FACTOR = CONFIG.framing.SMOOTHING_FACTOR; // 0.05; // For exponential moving average to smooth, aka how much you trust the new value // update these based on config
-const keepZoomReset = CONFIG.framing.keepZoomReset; // update
+// const TARGET_FACE_RATIO = CONFIG.framing.TARGET_FACE_RATIO; // 0.4; // Face height = 30% of frame height // update these based on config
+// const SMOOTHING_FACTOR = CONFIG.framing.SMOOTHING_FACTOR; // 0.05; // For exponential moving average to smooth, aka how much you trust the new value // update these based on config
+// const keepZoomReset = CONFIG.framing.keepZoomReset; // update
 
 // smoothing and drawing declarations
 let smoothedX = 0,
@@ -402,3 +396,20 @@ function didPositionChange(newFace, oldFace) {
 // 1. when move significantly, there may be 2+ newFaces in that one movements so it kinda jumps to one newFace (in middle of movement) then jumps to final newFace (at the end of the movement). this makes it kinda jumpy.
 // 2. doesn't stop me from going offscreen...should i do the weird masking thing that you showed me on google meet where it moves the mask of your face back to center? can i even do that without a background...i guess i can.
 // 7. when another person enters frame and both faces are equally visible (one isn't very far in back), because processFrame() only creates face based on the most "prominent face", if both are oscillating between being equally as promiminent with every small movement, the camera zoom jumps around. Solve: could just remove all detections from detections array except for first one every time it detects face (every frame) so it literally can only adapt to the first person it sees...? not sure act.
+
+async function main() {
+  await loadConfig();
+
+  TARGET_FACE_RATIO = CONFIG.framing.TARGET_FACE_RATIO;
+  SMOOTHING_FACTOR = CONFIG.framing.SMOOTHING_FACTOR;
+  keepZoomReset = CONFIG.framing.keepZoomReset;
+
+  await initializefaceDetector();
+
+  if (hasGetUserMedia()) {
+    enableWebcamButton = document.getElementById("webcamButton");
+    enableWebcamButton.addEventListener("click", enableCam); // When someone clicks this button, run the enableCam function
+  } else {
+    console.warn("getUserMedia() is not supported by your browser");
+  }
+}
