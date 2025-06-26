@@ -3,7 +3,7 @@ import {
   FilesetResolver,
 } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
 
-import { CONFIG } from "config.json";
+import { CONFIG } from "./config.json";
 
 let faceDetector; // type: FaceDetector
 // let runningMode = "VIDEO"; // update these based on config
