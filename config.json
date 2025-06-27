@@ -12,7 +12,7 @@
 
   "framing": {
     "TARGET_FACE_RATIO": 0.4,
-    "SMOOTHING_FACTOR": 0.05,
+    "SMOOTHING_FACTOR": 0.1,
     "keepZoomReset": false
   },
 

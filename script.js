@@ -123,7 +123,7 @@ async function enableCam(event) {
       // Store live settings in config so canvas size = video size
       CONFIG.canvas.width = settings.width;
       CONFIG.canvas.height = settings.height;
-      CONFIG.frameRate = settings.frameRate;
+      CONFIG.canvas.frameRate = settings.frameRate;
 
       canvas.width = CONFIG.canvas.width; // 640;
       canvas.height = CONFIG.canvas.height; // 480;
