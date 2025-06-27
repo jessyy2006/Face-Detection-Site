@@ -6,10 +6,11 @@ import {
 // Global variables
 let CONFIG = {}; // object to hold config
 let faceDetector; // type: FaceDetector
-// let runningMode = "VIDEO"; // update these based on config
-let TARGET_FACE_RATIO = 0;
-let SMOOTHING_FACTOR = 0;
-let keepZoomReset = 0;
+
+// defined in config
+let TARGET_FACE_RATIO;
+let SMOOTHING_FACTOR;
+let keepZoomReset;
 
 async function loadConfig() {
   try {
@@ -52,7 +53,6 @@ const initializefaceDetector = async () => {
       CONFIG.mediapipe.faceDetector.minDetectionConfidence, // 0.7, update these based on config
   });
 };
-// initializefaceDetector(); // returns promises
 
 /*************************************************/
 // CONTINUOUS FACE DETECTION
@@ -63,8 +63,6 @@ let videoZoom = document.getElementById("webcamMask"); // empty frame for masked
 // canvas setup
 const canvas = document.getElementById("framedOutput");
 const ctx = canvas.getContext("2d");
-// canvas.width = CONFIG.canvas.width; // 640;
-// canvas.height = CONFIG.canvas.height; // 480;
 
 // video setup
 const liveFullView = document.getElementById("liveFullView"); // can't change constant vars
@@ -74,14 +72,6 @@ let children = []; // Keep a reference of all the child elements we create on vi
 
 // Check if webcam access is supported.
 const hasGetUserMedia = () => !!navigator.mediaDevices?.getUserMedia; // !! converts the result to true or false
-
-// If webcam supported, add event listener to button for when user wants to activate it.
-// if (hasGetUserMedia()) {
-//   enableWebcamButton = document.getElementById("webcamButton");
-//   enableWebcamButton.addEventListener("click", enableCam); // When someone clicks this button, run the enableCam function
-// } else {
-//   console.warn("getUserMedia() is not supported by your browser");
-// }
 
 /**
  * Enable live webcam view and start detection.
@@ -127,8 +117,6 @@ async function enableCam(event) {
 
       canvas.width = CONFIG.canvas.width; // 640;
       canvas.height = CONFIG.canvas.height; // 480;
-
-      console.log("Live config:", CONFIG);
     })
     .catch((err) => {
       console.error(err);
@@ -157,7 +145,6 @@ async function predictWebcam() {
     //   confidence: 0.98 // detection certainty
     // }
     displayVideoDetections(detections); // calling func below using the face positions/landmarks in pixel coordinates stored in "detections" => VISUALIZES DETECTIONS. since mediapipe orders the most prominently detected face first, detections[0] is the most obvious face.
-    console.log("got to detections");
 
     processFrame(detections);
   }
@@ -242,11 +229,6 @@ function displayVideoDetections(detections) {
 // FACE TRACKING + ZOOM
 /*************************************************/
 
-// // Configuration for face tracking mechanism
-// const TARGET_FACE_RATIO = CONFIG.framing.TARGET_FACE_RATIO; // 0.4; // Face height = 30% of frame height // update these based on config
-// const SMOOTHING_FACTOR = CONFIG.framing.SMOOTHING_FACTOR; // 0.05; // For exponential moving average to smooth, aka how much you trust the new value // update these based on config
-// const keepZoomReset = CONFIG.framing.keepZoomReset; // update
-
 // smoothing and drawing declarations
 let smoothedX = 0,
   smoothedY = 0,
@@ -262,32 +244,26 @@ function processFrame(detections) {
   if (detections && detections.length > 0) {
     // if there is a face
     const newFace = detections[0].boundingBox; // most prom face -> get box. maybe delete this and just make oldFace = face
-    console.log("there is a face");
 
     // 1. initialize oldFace to first EVER face to set anchor to track rest of face movements
     if (!oldFace) {
       oldFace = newFace;
-      console.log("initially set oldface to newface");
     }
 
     // 2. has there been a significant jump or not?
     if (didPositionChange(newFace, oldFace)) {
       // if true, track newFace
-      console.log("tracking new face");
       faceFrame(newFace);
       oldFace = newFace; // if face moved a lot, now new pos = "old" pos as the reference.
     } else {
-      console.log("tracking old face");
       // track oldFace
       faceFrame(oldFace);
     }
-    // console.log("got to processing canvas");
   } else {
     if (keepZoomReset) {
       // if user wants camera to zoom out if no face detected
       zoomReset();
     } // ALSO: make the transition between this smoother. if detected, then not detected, then detected (usntable detection), make sure it doesn't jump between zooms weirdly
-    console.log("detected no face, iterating now: ");
   }
 
   // Edgecase 1: avoid image stacking/black space when crop is smaller than canvas
@@ -342,10 +318,8 @@ function faceFrame(face) {
   if (zoomScale >= 1) {
     smoothedZoom =
       zoomScale * SMOOTHING_FACTOR + (1 - SMOOTHING_FACTOR) * smoothedZoom;
-    console.log("smoothed Zoom ok: ", smoothedZoom);
   } else {
     zoomReset(); // reset zoom to 1
-    console.log("smoothed Zoom = 1");
   }
 
   // Edge case 2: first detection of face = avoid blooming projection onto canvas
@@ -355,9 +329,7 @@ function faceFrame(face) {
     smoothedZoom = 1;
     firstDetection = false;
   }
-  // console.log("got to drawing canvas with face: ", face);
 }
-
 /**
  * When face isn't detected, optional framing reset to default stream determined by keepZoomReset boolean.
  */
@@ -396,11 +368,6 @@ function didPositionChange(newFace, oldFace) {
   }
 }
 
-// issues:
-// 1. when move significantly, there may be 2+ newFaces in that one movements so it kinda jumps to one newFace (in middle of movement) then jumps to final newFace (at the end of the movement). this makes it kinda jumpy.
-// 2. doesn't stop me from going offscreen...should i do the weird masking thing that you showed me on google meet where it moves the mask of your face back to center? can i even do that without a background...i guess i can.
-// 7. when another person enters frame and both faces are equally visible (one isn't very far in back), because processFrame() only creates face based on the most "prominent face", if both are oscillating between being equally as promiminent with every small movement, the camera zoom jumps around. Solve: could just remove all detections from detections array except for first one every time it detects face (every frame) so it literally can only adapt to the first person it sees...? not sure act.
-
 async function main() {
   await loadConfig();
 
@@ -408,7 +375,7 @@ async function main() {
   SMOOTHING_FACTOR = CONFIG.framing.SMOOTHING_FACTOR;
   keepZoomReset = CONFIG.framing.keepZoomReset;
 
-  await initializefaceDetector();
+  await initializefaceDetector(); // returns promises
 
   if (hasGetUserMedia()) {
     enableWebcamButton = document.getElementById("webcamButton");
@@ -418,3 +385,7 @@ async function main() {
   }
 }
 main();
+
+function exportFramedStream() {
+  return canvas.captureStream(CONFIG.canvas.frameRate);
+}
