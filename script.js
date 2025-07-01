@@ -125,6 +125,7 @@ async function enableCam(event) {
     .catch((err) => {
       console.error(err);
     });
+  videoZoom.srcObject = exportFramedStream();
 }
 
 let lastVideoTime = -1; // to make sure the func can start (-1 will never be equal to the video time)
@@ -299,12 +300,12 @@ function processFrame(detections) {
     canvas.width, // since canvas width/height is hardcoded to my video resolution, this maintains aspect ratio. should change this to update to whatever cam resolution rainbow uses.
     canvas.height
   );
-  if (!canvasStarted) {
-    console.log("canvas hasn't started being drawn");
-    videoZoom.srcObject = exportFramedStream();
-    console.log("Assigned stream to videoZoom:", videoZoom.srcObject);
-    canvasStarted = true;
-  } // display captured stream
+  // if (!canvasStarted) {
+  //   console.log("canvas hasn't started being drawn");
+  //   videoZoom.srcObject = exportFramedStream();
+  //   console.log("Assigned stream to videoZoom:", videoZoom.srcObject);
+  //   canvasStarted = true;
+  // } // display captured stream
 }
 /******************************************************************** */
 // FUNCTIONS USED IN processFrame():
