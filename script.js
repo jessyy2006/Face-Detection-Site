@@ -401,5 +401,5 @@ main();
 
 function exportFramedStream() {
   console.log("inside exportFramedStream");
-  return canvas.captureStream(CONFIG.canvas.frameRate);
+  return canvas.captureStream(); //CONFIG.canvas.frameRate
 }
