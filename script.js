@@ -61,7 +61,7 @@ let videoFull = document.getElementById("webcamFull"); // html element, empty fr
 let videoZoom = document.getElementById("webcamMask"); // empty frame for masked video png
 
 // canvas setup
-const canvas = OffscreenCanvasRenderingContext2D();
+const canvas = new OffscreenCanvas(320, 200);
 // const canvas = document.getElementById("framedOutput");
 const ctx = canvas.getContext("2d");
 
