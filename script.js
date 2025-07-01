@@ -300,7 +300,9 @@ function processFrame(detections) {
     canvas.height
   );
   if (!canvasStarted) {
+    console.log("canvas hasn't started being drawn");
     videoZoom.srcObject = exportFramedStream();
+    console.log("Assigned stream to videoZoom:", videoZoom.srcObject);
     canvasStarted = true;
   } // display captured stream
 }
