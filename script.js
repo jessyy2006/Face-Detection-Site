@@ -121,6 +121,7 @@ async function enableCam(event) {
       // CONFIG.canvas.width; // 640;
       canvas.height = 200;
       // CONFIG.canvas.height; // 480;
+      videoZoom.srcObject = exportFramedStream(); // display captured stream
     })
     .catch((err) => {
       console.error(err);
@@ -151,7 +152,6 @@ async function predictWebcam() {
     displayVideoDetections(detections); // calling func below using the face positions/landmarks in pixel coordinates stored in "detections" => VISUALIZES DETECTIONS. since mediapipe orders the most prominently detected face first, detections[0] is the most obvious face.
 
     processFrame(detections);
-    videoZoom.srcObject = exportFramedStream(); // display captured stream
   }
 
   // Call this function again to keep predicting when the browser is ready
