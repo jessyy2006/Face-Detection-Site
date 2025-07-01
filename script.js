@@ -155,7 +155,6 @@ async function predictWebcam() {
   // Call this function again to keep predicting when the browser is ready
   window.requestAnimationFrame(predictWebcam);
 }
-videoZoom.srcObject = exportFramedStream(); // display captured stream
 
 /**
  * VISUALIZES DETECTIONS for each frame on video element. Detects multiple people.
@@ -392,5 +391,7 @@ async function main() {
 main();
 
 function exportFramedStream() {
+  console.log("inside exportFramedStream");
   return canvas.captureStream(CONFIG.canvas.frameRate);
 }
+videoZoom.srcObject = exportFramedStream(); // display captured stream
