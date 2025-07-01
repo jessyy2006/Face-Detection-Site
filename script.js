@@ -61,6 +61,7 @@ let videoFull = document.getElementById("webcamFull"); // html element, empty fr
 let videoZoom = document.getElementById("webcamMask"); // empty frame for masked video png
 
 // canvas setup
+// const canvas = OffscreenCanvasRenderingContext2D();
 const canvas = document.getElementById("framedOutput");
 const ctx = canvas.getContext("2d");
 
@@ -111,12 +112,14 @@ async function enableCam(event) {
       const settings = videoTrack.getSettings();
 
       // Store live settings in config so canvas size = video size
-      CONFIG.canvas.width = settings.width;
-      CONFIG.canvas.height = settings.height;
-      CONFIG.canvas.frameRate = settings.frameRate;
+      // CONFIG.canvas.width = settings.width;
+      // CONFIG.canvas.height = settings.height;
+      // CONFIG.canvas.frameRate = settings.frameRate;
 
-      canvas.width = CONFIG.canvas.width; // 640;
-      canvas.height = CONFIG.canvas.height; // 480;
+      canvas.width = 320;
+      // CONFIG.canvas.width; // 640;
+      canvas.height = 200;
+      // CONFIG.canvas.height; // 480;
     })
     .catch((err) => {
       console.error(err);
