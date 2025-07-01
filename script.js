@@ -101,7 +101,7 @@ async function enableCam(event) {
       // .then(func ()): waits for the Promise by getUserMedia to finish. Once it’s ready, .then() runs the function you write below w the parameter as the thing getUserMedia returns/the thing you're waiting for (ex. When the webcam is ready, run this function and give it the video stream)
 
       videoFull.srcObject = stream; // link stream to video html element, which until now was just empty frame
-      videoZoom.srcObject = stream;
+      // videoZoom.srcObject = stream;
 
       videoFull.addEventListener("loadeddata", () => {
         predictWebcam();
@@ -155,6 +155,8 @@ async function predictWebcam() {
   // Call this function again to keep predicting when the browser is ready
   window.requestAnimationFrame(predictWebcam);
 }
+videoZoom.srcObject = exportFramedStream(); // display captured stream
+
 /**
  * VISUALIZES DETECTIONS for each frame on video element. Detects multiple people.
  * @param {detections[]} detections - array of detection objects (detected faces), from most high confidence to least.
