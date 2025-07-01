@@ -121,7 +121,6 @@ async function enableCam(event) {
       // CONFIG.canvas.width; // 640;
       canvas.height = 200;
       // CONFIG.canvas.height; // 480;
-      videoZoom.srcObject = exportFramedStream(); // display captured stream
     })
     .catch((err) => {
       console.error(err);
@@ -240,6 +239,7 @@ let smoothedX = 0,
   smoothedY = 0,
   smoothedZoom = 0,
   firstDetection = true,
+  canvasStarted = false, // debugging only, remove
   oldFace = null;
 
 /**
@@ -299,6 +299,10 @@ function processFrame(detections) {
     canvas.width, // since canvas width/height is hardcoded to my video resolution, this maintains aspect ratio. should change this to update to whatever cam resolution rainbow uses.
     canvas.height
   );
+  if (!canvasStarted) {
+    videoZoom.srcObject = exportFramedStream();
+    canvasStarted = true;
+  } // display captured stream
 }
 /******************************************************************** */
 // FUNCTIONS USED IN processFrame():
