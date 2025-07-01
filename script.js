@@ -103,6 +103,7 @@ async function enableCam(event) {
 
       videoFull.srcObject = stream; // link stream to video html element, which until now was just empty frame
       // videoZoom.srcObject = stream;
+      videoZoom.srcObject = exportFramedStream();
 
       videoFull.addEventListener("loadeddata", () => {
         predictWebcam();
@@ -125,7 +126,6 @@ async function enableCam(event) {
     .catch((err) => {
       console.error(err);
     });
-  videoZoom.srcObject = exportFramedStream();
 }
 
 let lastVideoTime = -1; // to make sure the func can start (-1 will never be equal to the video time)
